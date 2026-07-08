@@ -28,8 +28,9 @@ Reviewing and merging those is the habit.
 ## 3. Turn on secret scanning (5 min)
 
 GitHub → **Settings → Code security**:
-- **Secret scanning** → Enable  (free on public repos)
-- **Push protection** → Enable  — blocks a commit that contains a detected key **before**
+
+- **Secret scanning** → Enable (free on public repos)
+- **Push protection** → Enable — blocks a commit that contains a detected key **before**
   it lands. This is the single biggest protection for AI-generated code.
 
 The included `security.yml` (gitleaks + semgrep) is the portable backup that also runs in CI.
@@ -45,13 +46,13 @@ key in git history is compromised forever.
 
 GitHub → **Settings → Rules → New ruleset** → target `main`:
 
-| Rule | Set |
-|---|---|
-| Require a pull request before merging | ON |
-| Require **1** approval (not the author) | ON |
-| Require status checks to pass → add `ci` | ON |
-| Block force pushes | ON |
-| Dismiss stale approvals on new commits | ON |
+| Rule                                     | Set |
+| ---------------------------------------- | --- |
+| Require a pull request before merging    | ON  |
+| Require **1** approval (not the author)  | ON  |
+| Require status checks to pass → add `ci` | ON  |
+| Block force pushes                       | ON  |
+| Dismiss stale approvals on new commits   | ON  |
 
 Now "no direct push, no self-merge" is structural, not a promise.
 
