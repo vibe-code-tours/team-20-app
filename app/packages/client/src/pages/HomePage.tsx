@@ -31,7 +31,7 @@ export default function HomePage() {
    useEffect(() => {
       axios
          .get('/api/events/active')
-         .then((res) => setEvents(res.data.activeEvents))
+         .then((res) => setEvents(res.data.activeEvents ?? []))
          .catch(() => setEvents([]))
          .finally(() => setLoading(false));
    }, []);

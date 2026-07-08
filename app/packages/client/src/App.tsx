@@ -9,7 +9,6 @@ import CheckoutPage from './pages/CheckoutPage';
 import PaymentUploadPage from './pages/PaymentUploadPage';
 import OrderConfirmationPage from './pages/OrderConfirmationPage';
 import ContactPage from './pages/ContactPage';
-import ChatBot from './components/chat/ChatBot';
 
 export default function App() {
    return (
@@ -32,7 +31,6 @@ export default function App() {
                />
                <Route path="/contact" element={<ContactPage />} />
             </Route>
-            <Route path="/chat" element={<ChatBot />} />
          </Routes>
       </BrowserRouter>
    );
