@@ -49,11 +49,14 @@ Keep this Quickstart working — it's how a new teammate onboards in 5 minutes.
 git clone <repo-url> && cd <repo>
 cp .env.example .env                    # fill in real values LOCALLY — never commit .env
 cd app && bun install                   # install dependencies in project folder
+cd ../                                  # go back to root
 cd app/packages/client && bun install   # install dependencies in client folder
+cd ../../../                            # go back to root
 cd app/packages/server && bun install   # install dependencies in server folder
+cd ../../../                            # go back to root
 ```
 
-Create a `.env` file inside `packages/server`:
+Create a `.env` file inside `app/packages/server`:
 
 ```env
 DATABASE_URL="mysql://user:your_password@localhost:3306/fundraising"
@@ -65,6 +68,7 @@ Run database migrations
 
 ```bash
 cd app/packages/server && bunx prisma migrate dev
+cd ../../../
 ```
 
 Add sample data
@@ -76,8 +80,6 @@ Reference files:
 Run both files from the project root:
 
 ```bash
-cd app
-
 mysql -u your_username -p your_database_name < app/packages/server/docs/sample-data.sql
 mysql -u your_username -p your_database_name < app/packages/server/docs/migration_add_july2026_menu_items.sql
 ```
@@ -91,7 +93,7 @@ cd app
 bun run dev
 ```
 
-This uses `concurrently` to start the backend on `http://localhost:3000` and the frontend on `http://localhost:5173`.
+This uses `concurrently` to start the backend on `http://localhost:3000` and the frontend on `http://localhost:5173` or `http://localhost:5174`.
 
 Or start them individually:
 
