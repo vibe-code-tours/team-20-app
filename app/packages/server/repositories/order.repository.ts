@@ -56,7 +56,11 @@ export const orderRepository = {
                   })),
                },
             },
-            include: { event: true, items: true, customer: true },
+            include: {
+               event: true,
+               items: { include: { menuItem: true } },
+               customer: true,
+            },
          });
 
          for (const item of pricedItems) {
@@ -84,7 +88,7 @@ export const orderRepository = {
       return prisma.$transaction(async (tx) => {
          const existingOrder = await tx.order.findUnique({
             where: { orderNumber },
-            include: { items: true },
+            include: { items: { include: { menuItem: true } } },
          });
          if (!existingOrder) throw new Error('Order not found');
 
@@ -184,7 +188,11 @@ export const orderRepository = {
                   })),
                },
             },
-            include: { items: true, customer: true, event: true },
+            include: {
+               items: { include: { menuItem: true } },
+               customer: true,
+               event: true,
+            },
          });
       });
    },
@@ -195,14 +203,18 @@ export const orderRepository = {
       return prisma.$transaction(async (tx) => {
          const existingOrder = await tx.order.findUnique({
             where: { orderNumber },
-            include: { items: true },
+            include: { items: { include: { menuItem: true } } },
          });
 
          if (!existingOrder) throw new Error('Order not found');
          if (existingOrder.status === 'CANCELLED') {
             return tx.order.findUniqueOrThrow({
                where: { id: existingOrder.id },
-               include: { event: true, items: true, customer: true },
+               include: {
+                  event: true,
+                  items: { include: { menuItem: true } },
+                  customer: true,
+               },
             });
          }
 
@@ -223,7 +235,11 @@ export const orderRepository = {
          return tx.order.update({
             where: { id: existingOrder.id },
             data: { status: 'CANCELLED' },
-            include: { event: true, items: true, customer: true },
+            include: {
+               event: true,
+               items: { include: { menuItem: true } },
+               customer: true,
+            },
          });
       });
    },
@@ -234,7 +250,7 @@ export const orderRepository = {
       return prisma.$transaction(async (tx) => {
          const existingOrder = await tx.order.findUnique({
             where: { orderNumber },
-            include: { items: true },
+            include: { items: { include: { menuItem: true } } },
          });
          if (!existingOrder) throw new Error('Order not found');
 
@@ -289,14 +305,22 @@ export const orderRepository = {
                })),
             },
          },
-         include: { event: true, items: true, customer: true },
+         include: {
+            event: true,
+            items: { include: { menuItem: true } },
+            customer: true,
+         },
       });
    },
 
    async getOrders(): Promise<Order[]> {
       // SELECT * FROM orders
       return prisma.order.findMany({
-         include: { event: true, items: true, customer: true },
+         include: {
+            event: true,
+            items: { include: { menuItem: true } },
+            customer: true,
+         },
       });
    },
 
@@ -304,7 +328,11 @@ export const orderRepository = {
       // SELECT * FROM orders WHERE id = @id
       return prisma.order.findUnique({
          where: { id: orderId },
-         include: { event: true, items: true, customer: true },
+         include: {
+            event: true,
+            items: { include: { menuItem: true } },
+            customer: true,
+         },
       });
    },
 
@@ -312,7 +340,11 @@ export const orderRepository = {
       // SELECT * FROM orders WHERE eventId = @eventId
       return prisma.order.findMany({
          where: { eventId },
-         include: { event: true, items: true, customer: true },
+         include: {
+            event: true,
+            items: { include: { menuItem: true } },
+            customer: true,
+         },
       });
    },
 
@@ -320,14 +352,22 @@ export const orderRepository = {
       return prisma.order.findFirst({
          where: { eventId },
          orderBy: { createdAt: 'desc' },
-         include: { items: true, customer: true, event: true },
+         include: {
+            items: { include: { menuItem: true } },
+            customer: true,
+            event: true,
+         },
       });
    },
 
    async getOrdersByCustomer(customerId: number): Promise<Order[]> {
       return prisma.order.findMany({
          where: { customerId },
-         include: { event: true, items: true, customer: true },
+         include: {
+            event: true,
+            items: { include: { menuItem: true } },
+            customer: true,
+         },
       });
    },
 
@@ -335,7 +375,11 @@ export const orderRepository = {
       // SELECT * FROM orders WHERE orderNumber = @orderNumber
       return prisma.order.findUnique({
          where: { orderNumber: orderNumber },
-         include: { event: true, items: true, customer: true },
+         include: {
+            event: true,
+            items: { include: { menuItem: true } },
+            customer: true,
+         },
       });
    },
 
@@ -346,7 +390,11 @@ export const orderRepository = {
       // SELECT * FROM orders WHERE customerId = @customerId AND eventId = @eventId
       return prisma.order.findMany({
          where: { customerId, eventId },
-         include: { event: true, items: true, customer: true },
+         include: {
+            event: true,
+            items: { include: { menuItem: true } },
+            customer: true,
+         },
       });
    },
 
@@ -388,7 +436,11 @@ export const orderRepository = {
                })),
             },
          },
-         include: { items: true, customer: true, event: true },
+         include: {
+            items: { include: { menuItem: true } },
+            customer: true,
+            event: true,
+         },
       });
    },
 
@@ -430,7 +482,11 @@ export const orderRepository = {
                })),
             },
          },
-         include: { items: true, customer: true, event: true },
+         include: {
+            items: { include: { menuItem: true } },
+            customer: true,
+            event: true,
+         },
       });
    },
 
@@ -439,7 +495,11 @@ export const orderRepository = {
       return prisma.order.update({
          where: { orderNumber },
          data: { status: 'CONFIRMED' },
-         include: { event: true, items: true, customer: true },
+         include: {
+            event: true,
+            items: { include: { menuItem: true } },
+            customer: true,
+         },
       });
    },
 
@@ -448,7 +508,11 @@ export const orderRepository = {
       return prisma.order.update({
          where: { orderNumber },
          data: { status: 'COMPLETED' },
-         include: { event: true, items: true, customer: true },
+         include: {
+            event: true,
+            items: { include: { menuItem: true } },
+            customer: true,
+         },
       });
    },
 
@@ -457,7 +521,11 @@ export const orderRepository = {
       return prisma.order.update({
          where: { orderNumber },
          data: { status: 'CANCELLED' },
-         include: { event: true, items: true, customer: true },
+         include: {
+            event: true,
+            items: { include: { menuItem: true } },
+            customer: true,
+         },
       });
    },
 

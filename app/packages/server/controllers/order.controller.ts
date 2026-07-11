@@ -3,7 +3,7 @@ import z from 'zod';
 import { orderService } from '../services/order.service';
 
 const createOrderRequestSchema = z.object({
-   note: z.string().optional(),
+   note: z.string().nullable().optional(),
    eventId: z.number().positive('eventId must be a positive number'),
    customer: z.object({
       name: z.string().trim().min(1, 'customer name is required'),
@@ -28,7 +28,7 @@ const updateOrderRequestSchema = z.object({
          })
       )
       .min(1, 'At least one item is required in the order'),
-   note: z.string().optional(),
+   note: z.string().nullable().optional(),
 });
 
 export const orderController = {
