@@ -125,7 +125,10 @@ export default function MenuOrderingPage() {
          const res = await axios.post('/api/orders', {
             eventId: event.id,
             customer: { name: name.trim(), phone: phone.trim() },
-            items: cart.map((c) => ({ menuItemId: c.menuItemId, qty: c.qty })),
+            items: cart.map((c) => ({
+               menuItemId: c.menuItemId,
+               quantity: c.qty,
+            })),
             note: note.trim() || null,
          });
 
