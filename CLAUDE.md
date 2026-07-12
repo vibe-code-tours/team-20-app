@@ -169,6 +169,44 @@ Once the feature is tested and approved on `develop`, **DO NOT create a PR** fro
 - Pre-commit: lint-staged runs Prettier on staged files
 - CI: lint → typecheck → test → build on every PR
 
+## AI + Human Collaboration Workflow
+
+To ensure seamless coordination between the Developer (Human) and Claude (AI), this project enforces an Agentic Development Workflow guided by state tracking.
+
+### Phase 1: Pre-Execution & Safety Checks (CRITICAL)
+
+Before writing any code or analyzing the task, AI must perform the following checks:
+
+1. **Branch Check:** Check the current active Git branch.
+    - ⚠️ **Warning Rule:** If the active branch is `main` or `develop`, **STOP IMMEDIATELY**. Do not implement changes. Warn the user that they are on a protected branch and explicitly ask for confirmation/permission to proceed.
+
+2. **Context Sync:** Read the existing `doc/<current-branch-name>/state.md` file (if it exists) to restore memory and context from previous sessions.
+
+### Phase 2: Planning
+
+- **Small Tasks:** Proceed directly using Claude's standard internal planning.
+
+- **Large Tasks:** Prioritize planning before coding. Create a directory structure: `doc/<current-branch-name>/<task_name>_plan.md`. Write down the implementation plan and wait for human approval.
+
+### Phase 3: Implementation & State Logging
+
+1. AI implements the codebase changes based on the approved plan or task.
+2. Immediately after implementation, AI must update or create the state log file at:
+   `doc/<current-branch-name>/state.md`
+3. **Appending Rule:** The new log entry must be appended to the **TOP** of the `state.md` file using the exact format provided in `TEMPLATE_state.md`.
+4. The entry heading `## [YYYY-MM-DD HH:MM AM/PM] <type>: <description>` **MUST** serve as the official Git commit message.
+
+### Phase 4: Manual Testing & Iteration
+
+1. After updating `state.md`, AI must **STOP** and hand over control to the human developer.
+2. The Human performs **Manual Testing** (No automated tests required).
+3. If issues are found, the Human will instruct AI to modify the code. AI will repeat **Phase 3** and append a new entry to `state.md`.
+
+### Phase 5: Commit & Push
+
+1. Once testing passes, the Human (or AI, if instructed) will commit and push the changes.
+2. The commit message must strictly match the latest heading text from the top of `state.md`.
+
 ## Team
 
 - Client liaison: @sandarma
