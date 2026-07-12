@@ -1,0 +1,13 @@
+[build]
+  command = "cd ../.. && npm install && cd app/packages/server && npx prisma generate && cd ../client && npm run build"
+  functions = "packages/server/netlify/functions"
+  publish = "packages/client/dist"
+
+[functions]
+  node_bundler = "esbuild"
+  included_files = ["packages/server/prompts/**"]
+
+[[redirects]]
+  from = "/api/*"
+  to = "/.netlify/functions/server/:splat"
+  status = 200

@@ -1,22 +1,27 @@
 import fs from 'fs';
 import path from 'path';
+import { fileURLToPath } from 'url';
 // import OpenAI from 'openai';
 import { conversationRepository } from '../repositories/conversation.repository';
-// import template from '../prompts/wonderworld_chatbot.txt';
-import template from '../prompts/chatbot.txt';
 import { llmClient } from '../llm/client';
 
-import extractionTemplate from '../prompts/order_extraction.txt';
+// ESM __dirname compatibility
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 // implementation details // keep private
 // const client = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
-// const parkInfo = fs.readFileSync(
-//    path.join(__dirname, '..', 'prompts', 'WonderWorld.md'),
-//    'utf-8'
-// );
+// Read .txt prompt files via fs (Bun can import .txt directly, Node.js cannot)
+const template = fs.readFileSync(
+   path.join(__dirname, '..', 'prompts', 'chatbot.txt'),
+   'utf-8'
+);
 
-// const instructions = template.replace('{{parkInfo}}', parkInfo);
+const extractionTemplate = fs.readFileSync(
+   path.join(__dirname, '..', 'prompts', 'order_extraction.txt'),
+   'utf-8'
+);
 
 const info = fs.readFileSync(
    path.join(__dirname, '..', 'prompts', '20June26Event.md'),

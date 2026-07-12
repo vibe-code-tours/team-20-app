@@ -1,7 +1,12 @@
 import express from 'express';
 import path from 'path';
+import { fileURLToPath } from 'url';
 import dotenv from 'dotenv';
 import router from './routes';
+
+// ESM __dirname compatibility
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 // Load environment variables from .env file and store them in process.env
 dotenv.config();
@@ -12,16 +17,17 @@ const app = express();
 // Middleware to parse JSON bodies
 app.use(express.json());
 
-// Serve uploaded files statically
-app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
-
 // Use the defined routes
 app.use(router);
 
-// Start the server on the specified port, defaulting to 3000 if not set in environment variables
-const port = process.env.PORT || 3000;
+// Only listen when running directly (local dev)
+// When imported by Netlify Function, skip listen
+const isLambda = !!process.env.NETLIFY;
+if (!isLambda) {
+   const port = process.env.PORT || 3000;
+   app.listen(port, () => {
+      console.log(`Server is running at http://localhost:${port}`);
+   });
+}
 
-// Start the server and log a message to the console
-app.listen(port, () => {
-   console.log(`Server is running at http://localhost:${port}`);
-});
+export default app;
