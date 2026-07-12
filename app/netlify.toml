@@ -1,5 +1,6 @@
 [build]
-  command = "cd ../.. && npm install && cd app/packages/server && npx prisma generate && cd ../client && npm run build"
+  base = "."
+  command = "npm install && cd packages/server && npx prisma generate && cd ../client && npm run build"
   functions = "packages/server/netlify/functions"
   publish = "packages/client/dist"
 
