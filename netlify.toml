@@ -1,6 +1,6 @@
 [build]
   base = "app"
-  command = "npm install && cd packages/server && npx prisma generate && cd ../client && npm run build"
+  command = "npm install --legacy-peer-deps && cd packages/server && npx prisma generate && cd ../client && npm run build"
   functions = "packages/server/netlify/functions"
   publish = "packages/client/dist"
 

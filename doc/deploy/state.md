@@ -1,5 +1,39 @@
 # Feature State Log
 
+## [2026-07-12 03:45 PM] fix: resolve Netlify deployment build failures
+
+### Summary of Changes
+
+- Removed `bun.lock` file (was interfering with npm workspace resolution on Netlify)
+- Removed Bun-specific `"module": "index.ts"` field from root `app/package.json` and `app/packages/server/package.json`
+- Removed `"peerDependencies"` block from root and server `package.json` (not needed for npm)
+- Added `--legacy-peer-deps` to npm install command in `netlify.toml` (fixes npm arborist workspace bug)
+- Moved `netlify.toml` from `app/` to repo root with `base = "app"` (Netlify needs toml at repo root)
+- Fixed Netlify build command paths to work from `app/` base directory
+
+### Files Changed
+
+| File | Change |
+|---|---|
+| `app/bun.lock` | Deleted |
+| `app/package.json` | Removed `"module"` and `"peerDependencies"` |
+| `app/packages/server/package.json` | Removed `"module"` and `"peerDependencies"` |
+| `netlify.toml` | Moved to repo root, added `base = "app"`, added `--legacy-peer-deps` |
+| `app/netlify.toml` | Deleted (moved to root) |
+
+### Impact & Dependencies
+
+- No local dev changes — `npm run dev` still works as before
+- Netlify build should now succeed with clean npm install
+- Requires push to trigger new Netlify deploy
+
+### Testing Status
+
+- [x] AI Self-Review Done
+- [ ] Human Manual Test Pending
+
+---
+
 ## [2026-07-12 03:15 PM] fix: resolve .txt import and multer-s3 version issues
 
 ### Summary of Changes

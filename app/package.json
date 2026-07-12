@@ -1,6 +1,5 @@
 {
    "name": "app",
-   "module": "index.ts",
    "type": "module",
    "private": true,
    "scripts": {
@@ -14,9 +13,6 @@
       "lint-staged": "^16.4.0",
       "prettier": "^3.8.3",
       "tsx": "^4.19.0"
-   },
-   "peerDependencies": {
-      "typescript": "^5"
    },
    "workspaces": [
       "packages/*"
