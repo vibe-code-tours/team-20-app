@@ -1,13 +1,17 @@
 import fs from 'fs';
 import path from 'path';
-import { fileURLToPath } from 'url';
 // import OpenAI from 'openai';
 import { conversationRepository } from '../repositories/conversation.repository';
 import { llmClient } from '../llm/client';
 
-// ESM __dirname compatibility
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+// __dirname compatibility: works in ESM (tsx) and CJS (Netlify esbuild bundle)
+const __dirname = path.dirname(
+   typeof import.meta?.url !== 'undefined'
+      ? new URL(import.meta.url).pathname
+      : typeof __filename !== 'undefined'
+        ? __filename
+        : path.join(process.cwd(), 'packages/server')
+);
 
 // implementation details // keep private
 // const client = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
