@@ -1,15 +1,34 @@
 import type { Request, Response } from 'express';
 import multer from 'multer';
+import multerS3 from 'multer-s3';
 import path from 'path';
+import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3';
 import { prisma } from '../prisma';
 
-// Configure multer for local storage
-const storage = multer.diskStorage({
-   destination: path.join(__dirname, '..', 'uploads'),
-   filename: (req, file, cb) => {
-      const orderNumber = req.params.orderNumber;
+// Configure S3 client for Aiven Object Storage
+const s3 = new S3Client({
+   region: 'us-east-1',
+   endpoint: process.env.S3_ENDPOINT,
+   credentials: {
+      accessKeyId: process.env.S3_ACCESS_KEY || '',
+      secretAccessKey: process.env.S3_SECRET_KEY || '',
+   },
+   // Aiven S3-compatible storage may need forcePathStyle
+   forcePathStyle: true,
+});
+
+const BUCKET = process.env.S3_BUCKET || '';
+
+// Configure multer with S3 storage
+const storage = multerS3({
+   s3,
+   bucket: BUCKET,
+   contentType: multerS3.AUTO_CONTENT_TYPE,
+   key: (_req, file, cb) => {
+      const orderNumber = _req.params.orderNumber;
       const ext = path.extname(file.originalname);
-      cb(null, `${orderNumber}-${Date.now()}${ext}`);
+      const key = `payments/${orderNumber}-${Date.now()}${ext}`;
+      cb(null, key);
    },
 });
 
@@ -50,7 +69,9 @@ export const uploadPaymentScreenshot = [
             return res.status(404).json({ error: 'Order not found' });
          }
 
-         const screenshotUrl = `/uploads/${req.file.filename}`;
+         // Use the S3 URL from multer-s3
+         const screenshotUrl =
+            (req.file as any).location || (req.file as any).key;
 
          await prisma.order.update({
             where: { orderNumber },
