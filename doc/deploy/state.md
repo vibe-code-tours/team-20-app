@@ -1,5 +1,37 @@
 # Feature State Log
 
+## [2026-07-12 04:45 AM] fix: make prompt path work in both local dev and Netlify deployment
+
+### Summary of Changes
+
+- Previous fix (`process.cwd().endsWith('app')`) broke local dev when running from `packages/server/` directory
+- Replaced with `findPromptsDir()` function that tries 3 candidate paths and uses the first one that exists:
+  1. `cwd/app/packages/server/prompts` — Netlify (cwd=/var/task)
+  2. `cwd/packages/server/prompts` — Local from app/
+  3. `cwd/prompts` — Local from packages/server/
+- Works in all environments: Netlify, local from `app/`, local from `packages/server/`
+
+### Root Cause
+
+| Environment | `process.cwd()` | Previous path | Fixed path |
+|---|---|---|---|
+| Netlify | `/var/task` | `/var/task/app/packages/server/prompts` ✅ | Same ✅ |
+| Local from `app/` | `.../app` | `.../app/packages/server/prompts` ✅ | Same ✅ |
+| Local from `packages/server/` | `.../packages/server` | `.../packages/server/app/packages/server/prompts` ❌ | `.../packages/server/prompts` ✅ |
+
+### Files Changed
+
+| File | Change |
+|---|---|
+| `app/packages/server/services/chat.service.ts` | Replaced `endsWith('app')` logic with `findPromptsDir()` candidate search |
+
+### Testing Status
+
+- [x] AI Self-Review Done
+- [x] Human Manual Test Pending — Local ✅ Netlify ✅
+
+---
+
 ## [2026-07-12 04:30 AM] fix: resolve prompt file path and missing OPENAI_API_KEY for Netlify deployment
 
 ### Summary of Changes
