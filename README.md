@@ -17,16 +17,11 @@ A web-based preorder management platform that helps community fundraising events
 
 ## Prerequisites
 
-### 1. Bun (Required)
+### 1. Node.js (Required)
 
 ```bash
-curl -fsSL https://bun.sh/install | bash
-```
-
-Verify:
-
-```bash
-bun --version
+node --version  # v20+ required
+npm --version
 ```
 
 ### 2. MySQL
@@ -48,27 +43,26 @@ Keep this Quickstart working — it's how a new teammate onboards in 5 minutes.
 ```bash
 git clone <repo-url> && cd <repo>
 cp .env.example .env                    # fill in real values LOCALLY — never commit .env
-cd app && bun install                   # install dependencies in project folder
-cd ../                                  # go back to root
-cd app/packages/client && bun install   # install dependencies in client folder
-cd ../../../                            # go back to root
-cd app/packages/server && bun install   # install dependencies in server folder
-cd ../../../                            # go back to root
+cd app && npm install                   # install all dependencies (workspaces)
 ```
 
 Create a `.env` file inside `app/packages/server`:
 
 ```env
 DATABASE_URL="mysql://user:your_password@localhost:3306/fundraising"
+OPENAI_API_KEY=your_openai_key
+MY_AWS_REGION=your_region
+MY_AWS_ACCESS_KEY_ID=your_key
+MY_AWS_SECRET_ACCESS_KEY=your_secret
+MY_AWS_S3_BUCKET_NAME=your_bucket
 ```
 
-Replace your_password with your actual MySQL credentials.
+Replace with your actual credentials.
 
 Run database migrations
 
 ```bash
-cd app/packages/server && bunx prisma migrate dev
-cd ../../../
+cd app/packages/server && npx prisma migrate dev
 ```
 
 Add sample data
@@ -90,7 +84,7 @@ From the project root, run both simultaneously:
 
 ```bash
 cd app
-bun run dev
+npm run dev
 ```
 
 This uses `concurrently` to start the backend on `http://localhost:3000` and the frontend on `http://localhost:5173` or `http://localhost:5174`.
@@ -99,10 +93,10 @@ Or start them individually:
 
 ```bash
 # Backend only
-cd app/packages/server && bun run dev
+cd app/packages/server && npm run dev
 
 # Frontend only
-cd app/packages/client && bun run dev
+cd app/packages/client && npm run dev
 ```
 
 ## Stack
@@ -137,7 +131,7 @@ cd app/packages/client && bun run dev
 ### Deployment
 
 - Frontend: Netlify
-- Backend: Render
+- Backend: Netlify Functions (serverless via `serverless-http`)
 
 ## Project structure
 

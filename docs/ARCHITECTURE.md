@@ -31,8 +31,12 @@ We are building the Fundraising Website and Ordering Platform, a web application
 
 ## External services
 
-<!-- LLM proxy, DB, auth, hosting/deploy target, analytics. Which keys they need
-     (names only — real values live in .env / GitHub Secrets). -->
+| Service | Purpose | Env vars |
+|---|---|---|
+| MySQL | Primary database | `DATABASE_URL` |
+| OpenAI API | Chatbot + order extraction (gpt-4o-mini) | `OPENAI_API_KEY` |
+| Amazon S3 | Payment screenshot storage | `MY_AWS_REGION`, `MY_AWS_ACCESS_KEY_ID`, `MY_AWS_SECRET_ACCESS_KEY`, `MY_AWS_S3_BUCKET_NAME` |
+| Netlify Functions | Backend deployment (serverless) | — |
 
 ## How to run
 
