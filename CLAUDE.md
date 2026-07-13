@@ -12,34 +12,34 @@ Fundraising Website — a web-based preorder management platform for community f
 
 ```bash
 # Run both frontend and backend
-cd app && bun run dev
+cd app && npm run dev
 
 # Run individually
-cd app/packages/client && bun run dev   # Frontend (Vite, port 5173/5174)
-cd app/packages/server && bun run dev  # Backend (Express, port 3000)
+cd app/packages/client && npm run dev   # Frontend (Vite, port 5173/5174)
+cd app/packages/server && npm run dev  # Backend (Express, port 3000)
 ```
 
 ### Database
 
 ```bash
-cd app/packages/server && bunx prisma migrate dev  # Run migrations
+cd app/packages/server && npx prisma migrate dev  # Run migrations
 ```
 
 ### Linting & Formatting
 
 ```bash
 # Lint
-cd app/packages/client && bun run lint
-cd app/packages/server && bun run lint
+cd app/packages/client && npm run lint
+cd app/packages/server && npm run lint
 
 # Format (pre-commit hook runs this automatically)
-cd app && bun run format
+cd app && npm run format
 ```
 
 ### Build
 
 ```bash
-cd app/packages/client && bun run build  # Production build
+cd app/packages/client && npm run build  # Production build
 ```
 
 ## Architecture
@@ -72,8 +72,7 @@ cd app/packages/client && bun run build  # Production build
 **External services:**
 
 - OpenAI API (gpt-4o-mini) — chatbot and order extraction via `llm/client.ts`
-- Multer — payment screenshot uploads
-- Amazon S3 — payment screenshot storage (configured via env)
+- Amazon S3 — payment screenshot uploads via `utils/s3.ts` and `services/payment.service.ts`
 
 ### Frontend (React + Vite + TailwindCSS)
 
@@ -83,7 +82,7 @@ cd app/packages/client && bun run build  # Production build
     - `chat/` — ChatBot with phase-based conversation flow (choose_event → show_menu → choose_items → collect_profile → confirm → placed)
     - `layout/` — NavLayout wrapper
 
-**Key libraries:** react-router-dom, axios, react-hook-form, shadcn/ui, lucide-react
+**Key libraries:** react-router-dom, axios, react-hook-form, shadcn, react-icons, react-markdown, @base-ui/react
 
 ## Data Model (Prisma)
 
@@ -106,6 +105,10 @@ Required in `app/packages/server/.env`:
 - `DATABASE_URL` — MySQL connection string
 - `OPENAI_API_KEY` — OpenAI API key
 - `PORT` — Server port (default: 3000)
+- `MY_AWS_REGION` — AWS region for S3
+- `MY_AWS_ACCESS_KEY_ID` — AWS access key for S3
+- `MY_AWS_SECRET_ACCESS_KEY` — AWS secret key for S3
+- `MY_AWS_S3_BUCKET_NAME` — S3 bucket name for payment screenshots
 
 ## Git Workflow
 
