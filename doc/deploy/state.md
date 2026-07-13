@@ -1,5 +1,51 @@
 # Feature State Log
 
+## [2026-07-13 07:05 PM] fix: pin @types/node and use npm ci to prevent Netlify ETARGET build failure
+
+### Summary of Changes
+
+- Pinned `@types/node` from `^22.15.3` to `22.15.35` in `app/packages/client/package.json`
+- Changed Netlify build command from `npm install` to `npm ci` in `netlify.toml`
+- Regenerated `package-lock.json` with pinned version
+
+### Root Cause
+
+Netlify build failed with `npm error notarget No matching version found for @types/node@22.20.1`.
+
+**What happened:**
+1. `package.json` had `"@types/node": "^22.15.3"` (caret allows minor upgrades)
+2. Local `npm install` resolved to the latest matching version: `22.20.1`
+3. `package-lock.json` pinned to `22.20.1`
+4. Netlify build ran at `11:05:48 UTC` — at that moment, `22.20.1` was either not yet published or npm's CDN hadn't synced it to Netlify's build region
+5. `npm install` (used in build command) tried to fetch the exact pinned version from the lock file, couldn't find it, and errored with `ETARGET`
+
+**Why it worked locally:** Your machine had the latest npm registry. Netlify's build environment was behind.
+
+### Prevention
+
+| Problem | Fix Applied |
+|---|---|
+| `^` range resolved to unpublished version | Pinned to exact `22.15.35` — no surprise upgrades |
+| `npm install` ignores lock file mismatches | Switched to `npm ci` — fails if lock file doesn't match `package.json` |
+
+**Team rule:** After this fix, always run `npm ci --legacy-peer-deps` in Netlify builds, not `npm install`. If you update dependencies, commit both `package.json` AND `package-lock.json` together.
+
+### Files Changed
+
+| File | Change |
+|---|---|
+| `app/packages/client/package.json` | `"@types/node": "^22.15.3"` → `"22.15.35"` (pinned) |
+| `netlify.toml` | `npm install --legacy-peer-deps` → `npm ci --legacy-peer-deps` |
+| `app/package-lock.json` | Regenerated with pinned version |
+
+### Testing Status
+
+- [x] AI Self-Review Done
+- [x] Local build tested — prisma generate + vite build pass
+- [x] Netlify deployment tested — deploy successful
+
+---
+
 ## [2026-07-13 12:35 AM] fix: remove invalid Prisma constructor option
 
 ### Summary of Changes
