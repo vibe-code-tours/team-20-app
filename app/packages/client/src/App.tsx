@@ -1,4 +1,5 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { ThemeProvider } from './components/theme/ThemeContext';
 import NavLayout from './components/layout/NavLayout';
 import HomePage from './pages/HomePage';
 import AboutPage from './pages/AboutPage';
@@ -12,26 +13,34 @@ import ContactPage from './pages/ContactPage';
 
 export default function App() {
    return (
-      <BrowserRouter>
-         <Routes>
-            <Route element={<NavLayout />}>
-               <Route path="/" element={<HomePage />} />
-               <Route path="/about" element={<AboutPage />} />
-               <Route path="/events" element={<EventsPage />} />
-               <Route path="/events/:eventId" element={<EventDetailPage />} />
-               <Route
-                  path="/events/:eventId/order"
-                  element={<MenuOrderingPage />}
-               />
-               <Route path="/checkout" element={<CheckoutPage />} />
-               <Route path="/payment-upload" element={<PaymentUploadPage />} />
-               <Route
-                  path="/order-confirmation"
-                  element={<OrderConfirmationPage />}
-               />
-               <Route path="/contact" element={<ContactPage />} />
-            </Route>
-         </Routes>
-      </BrowserRouter>
+      <ThemeProvider>
+         <BrowserRouter>
+            <Routes>
+               <Route element={<NavLayout />}>
+                  <Route path="/" element={<HomePage />} />
+                  <Route path="/about" element={<AboutPage />} />
+                  <Route path="/events" element={<EventsPage />} />
+                  <Route
+                     path="/events/:eventId"
+                     element={<EventDetailPage />}
+                  />
+                  <Route
+                     path="/events/:eventId/order"
+                     element={<MenuOrderingPage />}
+                  />
+                  <Route path="/checkout" element={<CheckoutPage />} />
+                  <Route
+                     path="/payment-upload"
+                     element={<PaymentUploadPage />}
+                  />
+                  <Route
+                     path="/order-confirmation"
+                     element={<OrderConfirmationPage />}
+                  />
+                  <Route path="/contact" element={<ContactPage />} />
+               </Route>
+            </Routes>
+         </BrowserRouter>
+      </ThemeProvider>
    );
 }
