@@ -34,11 +34,6 @@ const updateOrderRequestSchema = z.object({
 export const orderController = {
    async createOrder(req: Request, res: Response) {
       // Logic to create a new order
-      console.log('[OrderController] req.body:', JSON.stringify(req.body));
-      console.log(
-         '[OrderController] Content-Type:',
-         req.headers['content-type']
-      );
 
       const parseResult = createOrderRequestSchema.safeParse(req.body);
       if (!parseResult.success) {

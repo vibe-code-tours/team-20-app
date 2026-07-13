@@ -27,6 +27,43 @@
 
 ---
 
+## [2026-07-13 02:25 PM] fix: Netlify body parsing - Buffer not decoded by express.json()
+
+### Summary of Changes
+
+- Added Buffer-to-JSON middleware in `index.ts` BEFORE `express.json()`
+- Converts `req.body` from Buffer (Lambda event format) to parsed JSON
+- Fixed React error #31 crash in `MenuOrderingPage.tsx` (error handler was rendering Zod error object)
+
+### Root Cause
+
+- `serverless-http` passes Lambda event body as a raw `Buffer` to Express
+- `express.json()` middleware doesn't decode Buffers — it only parses strings
+- Zod received a Buffer instead of an object, so ALL fields failed validation
+- Frontend tried to render the Zod error object as React child → crash
+
+### Test Results
+
+- Local with Aiven: ✅ Orders create successfully
+- Netlify: Pending deployment test
+
+### Files Changed
+
+| File | Change |
+|---|---|
+| `app/packages/server/index.ts` | Added Buffer-to-JSON middleware before express.json() |
+| `app/packages/server/netlify/functions/server.ts` | Removed duplicate middleware |
+| `app/packages/server/controllers/order.controller.ts` | Removed debug logging |
+| `app/packages/client/src/pages/MenuOrderingPage.tsx` | Fixed error handler to extract string from Zod error object |
+
+### Testing Status
+
+- [x] AI Self-Review Done
+- [x] Local tested
+- [ ] Netlify deployment test pending
+
+---
+
 ## [2026-07-12 04:45 AM] fix: make prompt path work in both local dev and Netlify deployment
 
 ### Summary of Changes

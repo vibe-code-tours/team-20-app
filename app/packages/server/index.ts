@@ -8,6 +8,19 @@ dotenv.config();
 // Create an Express application
 const app = express();
 
+// Fix: Netlify Functions pass req.body as a Buffer (from Lambda event).
+// Convert it to a string BEFORE express.json() so it can parse it.
+app.use((_req, _res, next) => {
+   if (Buffer.isBuffer(_req.body)) {
+      try {
+         _req.body = JSON.parse(_req.body.toString('utf-8'));
+      } catch {
+         // leave as-is if not JSON
+      }
+   }
+   next();
+});
+
 // Middleware to parse JSON bodies
 app.use(express.json());
 
