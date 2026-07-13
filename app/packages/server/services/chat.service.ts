@@ -2,24 +2,41 @@ import fs from 'fs';
 import path from 'path';
 // import OpenAI from 'openai';
 import { conversationRepository } from '../repositories/conversation.repository';
-// import template from '../prompts/wonderworld_chatbot.txt';
-import template from '../prompts/chatbot.txt';
 import { llmClient } from '../llm/client';
-
-import extractionTemplate from '../prompts/order_extraction.txt';
 
 // implementation details // keep private
 // const client = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
-// const parkInfo = fs.readFileSync(
-//    path.join(__dirname, '..', 'prompts', 'WonderWorld.md'),
-//    'utf-8'
-// );
+// Read .txt prompt files via fs (Bun can import .txt directly, Node.js cannot)
+// Find prompts dir by trying multiple candidate paths (works in all environments):
+//   - Netlify: cwd=/var/task, files at /var/task/app/packages/server/prompts/
+//   - Local from app/: cwd=.../app, files at .../app/packages/server/prompts/
+//   - Local from server/: cwd=.../packages/server, files at .../packages/server/prompts/
+function findPromptsDir(): string {
+   const candidates = [
+      path.join(process.cwd(), 'app', 'packages', 'server', 'prompts'),
+      path.join(process.cwd(), 'packages', 'server', 'prompts'),
+      path.join(process.cwd(), 'prompts'),
+   ];
+   for (const candidate of candidates) {
+      if (fs.existsSync(path.join(candidate, 'chatbot.txt'))) {
+         return candidate;
+      }
+   }
+   // Fallback: return first candidate (will error with clear message)
+   return candidates[0];
+}
+const promptsDir = findPromptsDir();
 
-// const instructions = template.replace('{{parkInfo}}', parkInfo);
+const template = fs.readFileSync(path.join(promptsDir, 'chatbot.txt'), 'utf-8');
+
+const extractionTemplate = fs.readFileSync(
+   path.join(promptsDir, 'order_extraction.txt'),
+   'utf-8'
+);
 
 const info = fs.readFileSync(
-   path.join(__dirname, '..', 'prompts', '20June26Event.md'),
+   path.join(promptsDir, '20June26Event.md'),
    'utf-8'
 );
 
