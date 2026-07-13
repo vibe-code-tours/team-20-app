@@ -137,10 +137,17 @@ export default function MenuOrderingPage() {
             state: { orderNumber, eventName: event.name },
          });
       } catch (err: unknown) {
-         const message =
-            axios.isAxiosError(err) && err.response?.data?.error
-               ? err.response.data.error
-               : 'Failed to place order. Please try again.';
+         let message = 'Failed to place order. Please try again.';
+         if (axios.isAxiosError(err) && err.response?.data?.error) {
+            const errorData = err.response.data.error;
+            if (typeof errorData === 'string') {
+               message = errorData;
+            } else if (errorData._errors?.length) {
+               message = errorData._errors.join(', ');
+            } else if (typeof errorData === 'object') {
+               message = JSON.stringify(errorData);
+            }
+         }
          setSubmitError(message);
       } finally {
          setSubmitting(false);
