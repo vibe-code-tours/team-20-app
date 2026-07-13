@@ -59,3 +59,4 @@ AI-assisted development is encouraged, but every team member is responsible for 
 ## _Signed (all members):_
 
 - @sandarma
+- @rolexstar27
