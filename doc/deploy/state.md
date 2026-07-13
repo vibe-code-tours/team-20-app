@@ -1,5 +1,34 @@
 # Feature State Log
 
+## [2026-07-12 04:30 AM] fix: resolve prompt file path and missing OPENAI_API_KEY for Netlify deployment
+
+### Summary of Changes
+
+- Fixed prompt file path resolution in `chat.service.ts` — on Netlify, `process.cwd()` returns `/var/task` but files are under `/var/task/app/...` (due to `base = "app"` in netlify.toml)
+- Added smart detection: if `process.cwd()` ends with `app`, use it directly; otherwise append `app/` to the path
+- Identified and documented that `OPENAI_API_KEY` environment variable must be set in Netlify dashboard (OpenAI client crashes at module load if missing)
+- **API is now live and responding** at `https://fundraising-event-management.netlify.app/api/events/active`
+
+### Root Causes of 502 Errors (in order)
+
+| Error | Cause | Fix |
+|---|---|---|
+| `Missing credentials` | `OPENAI_API_KEY` not set in Netlify env vars | Added env var in Netlify dashboard |
+| `ENOENT: prompts/chatbot.txt` | `process.cwd()` = `/var/task` but files at `/var/task/app/...` | Path detection for `app/` prefix |
+
+### Files Changed
+
+| File | Change |
+|---|---|
+| `app/packages/server/services/chat.service.ts` | Smart `serverBase` path detection for prompts directory |
+
+### Testing Status
+
+- [x] AI Self-Review Done
+- [x] Human Manual Test Pending — API returns data ✅
+
+---
+
 ## [2026-07-12 04:15 AM] fix: replace import.meta.url with CJS-compatible __dirname for Netlify esbuild
 
 ### Summary of Changes
