@@ -15,69 +15,74 @@ export const orderRepository = {
       customerId: number,
       items: { menuItemId: number; quantity: number }[]
    ): Promise<Order> {
-      return prisma.$transaction(async (tx) => {
-         let total = 0;
-         const pricedItems: PricedOrderItem[] = [];
+      return prisma.$transaction(
+         async (tx) => {
+            let total = 0;
+            const pricedItems: PricedOrderItem[] = [];
 
-         for (const item of items) {
-            const menu = await tx.menuItem.findUnique({
-               where: { id: item.menuItemId },
-            });
-            if (!menu)
-               throw new Error(`Menu item ${item.menuItemId} not found`);
-            if (menu.isSoldOut) throw new Error(`${menu.name} is sold out`);
-            if (menu.stockQty < item.quantity) {
-               throw new Error(`${menu.name} has only ${menu.stockQty} left`);
-            }
-
-            const subtotal = menu.price * item.quantity;
-            total += subtotal;
-            pricedItems.push({
-               menuItemId: menu.id,
-               quantity: item.quantity,
-               unitPrice: menu.price,
-               subtotal,
-            });
-         }
-
-         const createdOrder = await tx.order.create({
-            data: {
-               customerId,
-               eventId,
-               orderNumber,
-               note,
-               total,
-               items: {
-                  create: pricedItems.map((item) => ({
-                     menuItemId: item.menuItemId,
-                     qty: item.quantity,
-                     unitPrice: item.unitPrice,
-                     subtotal: item.subtotal,
-                  })),
-               },
-            },
-            include: {
-               event: true,
-               items: { include: { menuItem: true } },
-               customer: true,
-            },
-         });
-
-         for (const item of pricedItems) {
-            const updated = await tx.menuItem.update({
-               where: { id: item.menuItemId },
-               data: { stockQty: { decrement: item.quantity } },
-            });
-            if (updated.stockQty <= 0 && !updated.isSoldOut) {
-               await tx.menuItem.update({
+            for (const item of items) {
+               const menu = await tx.menuItem.findUnique({
                   where: { id: item.menuItemId },
-                  data: { isSoldOut: true },
+               });
+               if (!menu)
+                  throw new Error(`Menu item ${item.menuItemId} not found`);
+               if (menu.isSoldOut) throw new Error(`${menu.name} is sold out`);
+               if (menu.stockQty < item.quantity) {
+                  throw new Error(
+                     `${menu.name} has only ${menu.stockQty} left`
+                  );
+               }
+
+               const subtotal = menu.price * item.quantity;
+               total += subtotal;
+               pricedItems.push({
+                  menuItemId: menu.id,
+                  quantity: item.quantity,
+                  unitPrice: menu.price,
+                  subtotal,
                });
             }
-         }
 
-         return createdOrder;
-      });
+            const createdOrder = await tx.order.create({
+               data: {
+                  customerId,
+                  eventId,
+                  orderNumber,
+                  note,
+                  total,
+                  items: {
+                     create: pricedItems.map((item) => ({
+                        menuItemId: item.menuItemId,
+                        qty: item.quantity,
+                        unitPrice: item.unitPrice,
+                        subtotal: item.subtotal,
+                     })),
+                  },
+               },
+               include: {
+                  event: true,
+                  items: { include: { menuItem: true } },
+                  customer: true,
+               },
+            });
+
+            for (const item of pricedItems) {
+               const updated = await tx.menuItem.update({
+                  where: { id: item.menuItemId },
+                  data: { stockQty: { decrement: item.quantity } },
+               });
+               if (updated.stockQty <= 0 && !updated.isSoldOut) {
+                  await tx.menuItem.update({
+                     where: { id: item.menuItemId },
+                     data: { isSoldOut: true },
+                  });
+               }
+            }
+
+            return createdOrder;
+         },
+         { timeout: 30000 }
+      );
    },
 
    async updateOrderByOrderNoWithStock(
@@ -85,196 +90,206 @@ export const orderRepository = {
       note: string | null,
       items: { menuItemId: number; quantity: number }[]
    ): Promise<Order> {
-      return prisma.$transaction(async (tx) => {
-         const existingOrder = await tx.order.findUnique({
-            where: { orderNumber },
-            include: { items: { include: { menuItem: true } } },
-         });
-         if (!existingOrder) throw new Error('Order not found');
-
-         const oldMap = new Map<number, number>();
-         for (const oldItem of existingOrder.items) {
-            oldMap.set(oldItem.menuItemId, oldItem.qty);
-         }
-
-         const newMap = new Map<number, number>();
-         for (const newItem of items) {
-            newMap.set(newItem.menuItemId, newItem.quantity);
-         }
-
-         const allMenuItemIds = new Set<number>([
-            ...Array.from(oldMap.keys()),
-            ...Array.from(newMap.keys()),
-         ]);
-
-         for (const menuItemId of allMenuItemIds) {
-            const oldQty = oldMap.get(menuItemId) ?? 0;
-            const newQty = newMap.get(menuItemId) ?? 0;
-            const delta = newQty - oldQty;
-            const menu = await tx.menuItem.findUnique({
-               where: { id: menuItemId },
+      return prisma.$transaction(
+         async (tx) => {
+            const existingOrder = await tx.order.findUnique({
+               where: { orderNumber },
+               include: { items: { include: { menuItem: true } } },
             });
-            if (!menu) throw new Error(`Menu item ${menuItemId} not found`);
-            if (delta > 0) {
-               if (menu.isSoldOut) throw new Error(`${menu.name} is sold out`);
-               if (menu.stockQty < delta) {
-                  throw new Error(
-                     `${menu.name} has only ${menu.stockQty} left`
-                  );
+            if (!existingOrder) throw new Error('Order not found');
+
+            const oldMap = new Map<number, number>();
+            for (const oldItem of existingOrder.items) {
+               oldMap.set(oldItem.menuItemId, oldItem.qty);
+            }
+
+            const newMap = new Map<number, number>();
+            for (const newItem of items) {
+               newMap.set(newItem.menuItemId, newItem.quantity);
+            }
+
+            const allMenuItemIds = new Set<number>([
+               ...Array.from(oldMap.keys()),
+               ...Array.from(newMap.keys()),
+            ]);
+
+            for (const menuItemId of allMenuItemIds) {
+               const oldQty = oldMap.get(menuItemId) ?? 0;
+               const newQty = newMap.get(menuItemId) ?? 0;
+               const delta = newQty - oldQty;
+               const menu = await tx.menuItem.findUnique({
+                  where: { id: menuItemId },
+               });
+               if (!menu) throw new Error(`Menu item ${menuItemId} not found`);
+               if (delta > 0) {
+                  if (menu.isSoldOut)
+                     throw new Error(`${menu.name} is sold out`);
+                  if (menu.stockQty < delta) {
+                     throw new Error(
+                        `${menu.name} has only ${menu.stockQty} left`
+                     );
+                  }
                }
             }
-         }
 
-         for (const menuItemId of allMenuItemIds) {
-            const oldQty = oldMap.get(menuItemId) ?? 0;
-            const newQty = newMap.get(menuItemId) ?? 0;
-            const delta = newQty - oldQty;
+            for (const menuItemId of allMenuItemIds) {
+               const oldQty = oldMap.get(menuItemId) ?? 0;
+               const newQty = newMap.get(menuItemId) ?? 0;
+               const delta = newQty - oldQty;
 
-            if (delta > 0) {
-               await tx.menuItem.update({
+               if (delta > 0) {
+                  await tx.menuItem.update({
+                     where: { id: menuItemId },
+                     data: { stockQty: { decrement: delta } },
+                  });
+               } else if (delta < 0) {
+                  await tx.menuItem.update({
+                     where: { id: menuItemId },
+                     data: { stockQty: { increment: Math.abs(delta) } },
+                  });
+               }
+
+               const latest = await tx.menuItem.findUnique({
                   where: { id: menuItemId },
-                  data: { stockQty: { decrement: delta } },
                });
-            } else if (delta < 0) {
+               if (!latest) continue;
                await tx.menuItem.update({
                   where: { id: menuItemId },
-                  data: { stockQty: { increment: Math.abs(delta) } },
+                  data: { isSoldOut: latest.stockQty <= 0 },
                });
             }
 
-            const latest = await tx.menuItem.findUnique({
-               where: { id: menuItemId },
-            });
-            if (!latest) continue;
-            await tx.menuItem.update({
-               where: { id: menuItemId },
-               data: { isSoldOut: latest.stockQty <= 0 },
-            });
-         }
+            let total = 0;
+            const pricedItems: PricedOrderItem[] = [];
+            for (const item of items) {
+               const menu = await tx.menuItem.findUnique({
+                  where: { id: item.menuItemId },
+               });
+               if (!menu)
+                  throw new Error(`Menu item ${item.menuItemId} not found`);
+               const subtotal = menu.price * item.quantity;
+               total += subtotal;
+               pricedItems.push({
+                  menuItemId: item.menuItemId,
+                  quantity: item.quantity,
+                  unitPrice: menu.price,
+                  subtotal,
+               });
+            }
 
-         let total = 0;
-         const pricedItems: PricedOrderItem[] = [];
-         for (const item of items) {
-            const menu = await tx.menuItem.findUnique({
-               where: { id: item.menuItemId },
+            await tx.orderItem.deleteMany({
+               where: { orderId: existingOrder.id },
             });
-            if (!menu)
-               throw new Error(`Menu item ${item.menuItemId} not found`);
-            const subtotal = menu.price * item.quantity;
-            total += subtotal;
-            pricedItems.push({
-               menuItemId: item.menuItemId,
-               quantity: item.quantity,
-               unitPrice: menu.price,
-               subtotal,
-            });
-         }
 
-         await tx.orderItem.deleteMany({
-            where: { orderId: existingOrder.id },
-         });
-
-         return tx.order.update({
-            where: { id: existingOrder.id },
-            data: {
-               note,
-               total,
-               items: {
-                  create: pricedItems.map((item) => ({
-                     menuItemId: item.menuItemId,
-                     qty: item.quantity,
-                     unitPrice: item.unitPrice,
-                     subtotal: item.subtotal,
-                  })),
+            return tx.order.update({
+               where: { id: existingOrder.id },
+               data: {
+                  note,
+                  total,
+                  items: {
+                     create: pricedItems.map((item) => ({
+                        menuItemId: item.menuItemId,
+                        qty: item.quantity,
+                        unitPrice: item.unitPrice,
+                        subtotal: item.subtotal,
+                     })),
+                  },
                },
-            },
-            include: {
-               items: { include: { menuItem: true } },
-               customer: true,
-               event: true,
-            },
-         });
-      });
+               include: {
+                  items: { include: { menuItem: true } },
+                  customer: true,
+                  event: true,
+               },
+            });
+         },
+         { timeout: 30000 }
+      );
    },
 
    async cancelOrderByOrderNumberWithStock(
       orderNumber: string
    ): Promise<Order> {
-      return prisma.$transaction(async (tx) => {
-         const existingOrder = await tx.order.findUnique({
-            where: { orderNumber },
-            include: { items: { include: { menuItem: true } } },
-         });
+      return prisma.$transaction(
+         async (tx) => {
+            const existingOrder = await tx.order.findUnique({
+               where: { orderNumber },
+               include: { items: { include: { menuItem: true } } },
+            });
 
-         if (!existingOrder) throw new Error('Order not found');
-         if (existingOrder.status === 'CANCELLED') {
-            return tx.order.findUniqueOrThrow({
+            if (!existingOrder) throw new Error('Order not found');
+            if (existingOrder.status === 'CANCELLED') {
+               return tx.order.findUniqueOrThrow({
+                  where: { id: existingOrder.id },
+                  include: {
+                     event: true,
+                     items: { include: { menuItem: true } },
+                     customer: true,
+                  },
+               });
+            }
+
+            for (const item of existingOrder.items) {
+               const updated = await tx.menuItem.update({
+                  where: { id: item.menuItemId },
+                  data: { stockQty: { increment: item.qty } },
+               });
+
+               if (updated.isSoldOut && updated.stockQty > 0) {
+                  await tx.menuItem.update({
+                     where: { id: item.menuItemId },
+                     data: { isSoldOut: false },
+                  });
+               }
+            }
+
+            return tx.order.update({
                where: { id: existingOrder.id },
+               data: { status: 'CANCELLED' },
                include: {
                   event: true,
                   items: { include: { menuItem: true } },
                   customer: true,
                },
             });
-         }
-
-         for (const item of existingOrder.items) {
-            const updated = await tx.menuItem.update({
-               where: { id: item.menuItemId },
-               data: { stockQty: { increment: item.qty } },
-            });
-
-            if (updated.isSoldOut && updated.stockQty > 0) {
-               await tx.menuItem.update({
-                  where: { id: item.menuItemId },
-                  data: { isSoldOut: false },
-               });
-            }
-         }
-
-         return tx.order.update({
-            where: { id: existingOrder.id },
-            data: { status: 'CANCELLED' },
-            include: {
-               event: true,
-               items: { include: { menuItem: true } },
-               customer: true,
-            },
-         });
-      });
+         },
+         { timeout: 30000 }
+      );
    },
 
    async deleteOrderByOrderNumberWithStock(
       orderNumber: string
    ): Promise<Order> {
-      return prisma.$transaction(async (tx) => {
-         const existingOrder = await tx.order.findUnique({
-            where: { orderNumber },
-            include: { items: { include: { menuItem: true } } },
-         });
-         if (!existingOrder) throw new Error('Order not found');
-
-         for (const item of existingOrder.items) {
-            const updated = await tx.menuItem.update({
-               where: { id: item.menuItemId },
-               data: { stockQty: { increment: item.qty } },
+      return prisma.$transaction(
+         async (tx) => {
+            const existingOrder = await tx.order.findUnique({
+               where: { orderNumber },
+               include: { items: { include: { menuItem: true } } },
             });
-            if (updated.isSoldOut && updated.stockQty > 0) {
-               await tx.menuItem.update({
+            if (!existingOrder) throw new Error('Order not found');
+
+            for (const item of existingOrder.items) {
+               const updated = await tx.menuItem.update({
                   where: { id: item.menuItemId },
-                  data: { isSoldOut: false },
+                  data: { stockQty: { increment: item.qty } },
                });
+               if (updated.isSoldOut && updated.stockQty > 0) {
+                  await tx.menuItem.update({
+                     where: { id: item.menuItemId },
+                     data: { isSoldOut: false },
+                  });
+               }
             }
-         }
 
-         await tx.orderItem.deleteMany({
-            where: { orderId: existingOrder.id },
-         });
+            await tx.orderItem.deleteMany({
+               where: { orderId: existingOrder.id },
+            });
 
-         return tx.order.delete({
-            where: { id: existingOrder.id },
-         });
-      });
+            return tx.order.delete({
+               where: { id: existingOrder.id },
+            });
+         },
+         { timeout: 30000 }
+      );
    },
 
    async createOrder(

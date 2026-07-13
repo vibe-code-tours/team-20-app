@@ -1,5 +1,32 @@
 # Feature State Log
 
+## [2026-07-13 12:35 AM] fix: remove invalid Prisma constructor option
+
+### Summary of Changes
+
+- Removed `connectTimeout` from PrismaClient constructor (not a valid option)
+- Kept `log: ['error', 'warn']` for debugging
+- Transaction timeout 30000ms in `order.repository.ts` still applies
+
+### Root Cause
+
+- PrismaClient constructor does not accept `connectTimeout` in datasources config
+- Valid options: `url` only. Connection timeout must be set in connection string or Prisma engine config
+- Fixed by removing invalid config, keeping only `log` option
+
+### Files Changed
+
+| File | Change |
+|---|---|
+| `app/packages/server/prisma.ts` | Removed invalid `datasources.db.connectTimeout` |
+
+### Testing Status
+
+- [x] AI Self-Review Done
+- [x] Tested locally - server starts, events load, orders create successfully
+
+---
+
 ## [2026-07-12 04:45 AM] fix: make prompt path work in both local dev and Netlify deployment
 
 ### Summary of Changes
