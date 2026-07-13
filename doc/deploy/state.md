@@ -1,5 +1,36 @@
 # Feature State Log
 
+## [2026-07-12 04:15 AM] fix: replace import.meta.url with CJS-compatible __dirname for Netlify esbuild
+
+### Summary of Changes
+
+- Removed `import.meta.url` based `__dirname` from `index.ts` and `chat.service.ts` (esbuild bundles to CJS where `import.meta` is empty/undefined, causing 502 Bad Gateway)
+- Replaced with `process.cwd()` based path resolution — reliable in both local dev and Netlify Functions
+- Removed unused `path` import and `__dirname` variable from `index.ts` (no longer needed)
+- Verified prompt file paths resolve correctly: `process.cwd() + packages/server/prompts/`
+- Verified function bundle loads without crash using esbuild local test
+- Confirmed Netlify officially supports Express.js via `serverless-http` (per docs)
+
+### Files Changed
+
+| File | Change |
+|---|---|
+| `app/packages/server/index.ts` | Removed `import.meta.url` / `__dirname`, cleaned up unused imports |
+| `app/packages/server/services/chat.service.ts` | Replaced `__dirname` with `process.cwd()` based `promptsDir` |
+
+### Impact & Dependencies
+
+- Fixes 502 Bad Gateway on all `/api/*` routes in Netlify deployment
+- Local dev unaffected — `process.cwd()` resolves to same directory
+- Verified with esbuild bundle test: function loads correctly
+
+### Testing Status
+
+- [x] AI Self-Review Done
+- [ ] Human Manual Test Pending
+
+---
+
 ## [2026-07-12 03:45 PM] fix: resolve Netlify deployment build failures
 
 ### Summary of Changes

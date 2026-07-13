@@ -4,31 +4,22 @@ import path from 'path';
 import { conversationRepository } from '../repositories/conversation.repository';
 import { llmClient } from '../llm/client';
 
-// __dirname compatibility: works in ESM (tsx) and CJS (Netlify esbuild bundle)
-const __dirname = path.dirname(
-   typeof import.meta?.url !== 'undefined'
-      ? new URL(import.meta.url).pathname
-      : typeof __filename !== 'undefined'
-        ? __filename
-        : path.join(process.cwd(), 'packages/server')
-);
-
 // implementation details // keep private
 // const client = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
 // Read .txt prompt files via fs (Bun can import .txt directly, Node.js cannot)
-const template = fs.readFileSync(
-   path.join(__dirname, '..', 'prompts', 'chatbot.txt'),
-   'utf-8'
-);
+// Use process.cwd() for reliable path resolution in both local dev and Netlify
+const promptsDir = path.join(process.cwd(), 'packages', 'server', 'prompts');
+
+const template = fs.readFileSync(path.join(promptsDir, 'chatbot.txt'), 'utf-8');
 
 const extractionTemplate = fs.readFileSync(
-   path.join(__dirname, '..', 'prompts', 'order_extraction.txt'),
+   path.join(promptsDir, 'order_extraction.txt'),
    'utf-8'
 );
 
 const info = fs.readFileSync(
-   path.join(__dirname, '..', 'prompts', '20June26Event.md'),
+   path.join(promptsDir, '20June26Event.md'),
    'utf-8'
 );
 

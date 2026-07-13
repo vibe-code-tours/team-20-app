@@ -1,16 +1,6 @@
 import express from 'express';
-import path from 'path';
 import dotenv from 'dotenv';
 import router from './routes';
-
-// __dirname compatibility: works in ESM (tsx) and CJS (Netlify esbuild bundle)
-const __dirname = path.dirname(
-   typeof import.meta?.url !== 'undefined'
-      ? new URL(import.meta.url).pathname
-      : typeof __filename !== 'undefined'
-        ? __filename
-        : path.join(process.cwd(), 'packages/server')
-);
 
 // Load environment variables from .env file and store them in process.env
 dotenv.config();
