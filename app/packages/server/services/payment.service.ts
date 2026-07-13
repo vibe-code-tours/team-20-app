@@ -11,7 +11,7 @@ export const paymentService = {
          throw new Error('Order not found');
       }
 
-      const bucketName = process.env.AWS_S3_BUCKET_NAME || '';
+      const bucketName = process.env.MY_AWS_S3_BUCKET_NAME || '';
       const key = `payment-screenshots/${orderNumber}-${Date.now()}${getExtension(file.originalname)}`;
 
       const screenshotUrl = await uploadToS3({

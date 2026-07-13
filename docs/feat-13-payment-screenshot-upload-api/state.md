@@ -13,7 +13,7 @@
 ### Impact & Dependencies
 
 - S3 bucket `fundraising-app-uploads` in `us-east-2` must be configured with the IAM user `fundraising-app-s3-user`.
-- Requires environment variables: `AWS_REGION`, `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`, `AWS_S3_BUCKET_NAME`.
+- Requires environment variables: `MY_AWS_REGION`, `MY_AWS_ACCESS_KEY_ID`, `MY_AWS_SECRET_ACCESS_KEY`, `MY_AWS_S3_BUCKET_NAME`.
 - No database schema changes required.
 - Route `POST /api/orders/:orderNumber/payment` remains unchanged.
 
