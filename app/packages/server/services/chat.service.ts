@@ -8,8 +8,13 @@ import { llmClient } from '../llm/client';
 // const client = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
 // Read .txt prompt files via fs (Bun can import .txt directly, Node.js cannot)
-// Use process.cwd() for reliable path resolution in both local dev and Netlify
-const promptsDir = path.join(process.cwd(), 'packages', 'server', 'prompts');
+// On Netlify (base="app"), cwd=/var/task and files are under /var/task/app/...
+// On local dev, cwd=app/ and files are under app/packages/server/prompts/
+// Detect: if cwd ends with 'app', use it as base; otherwise append 'app'
+const serverBase = process.cwd().endsWith('app')
+   ? process.cwd()
+   : path.join(process.cwd(), 'app');
+const promptsDir = path.join(serverBase, 'packages', 'server', 'prompts');
 
 const template = fs.readFileSync(path.join(promptsDir, 'chatbot.txt'), 'utf-8');
 
