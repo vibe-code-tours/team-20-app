@@ -6,6 +6,13 @@ import { menuItemController } from './controllers/menuitem.controller';
 import { orderController } from './controllers/order.controller';
 import { uploadPaymentScreenshot } from './controllers/payment.controller';
 
+import { authController } from './controllers/auth.controller';
+import { invitationController } from './controllers/invitation.controller';
+import { userController } from './controllers/user.controller';
+import { authenticate } from './middleware/auth';
+import { requireRole } from './middleware/authorize';
+import { rateLimitLogin } from './middleware/rate-limit';
+
 const router = express.Router();
 
 // create routes
@@ -17,10 +24,56 @@ router.get('/api/hello', (req: Request, res: Response) => {
    res.json({ message: 'Hello World!' });
 });
 
-router.post('/api/chat', chatController.sendMessage);
+// ─── Auth routes (public) ────────────────────────────────────────────────────
 
+router.post('/api/auth/register', authController.register);
+router.post('/api/auth/login', rateLimitLogin, authController.login);
+router.post('/api/auth/refresh', authController.refresh);
+
+// ─── Auth routes (authenticated) ─────────────────────────────────────────────
+
+router.get('/api/auth/me', authenticate, authController.me);
+router.post('/api/auth/logout', authenticate, authController.logout);
+
+// ─── Admin routes ────────────────────────────────────────────────────────────
+
+router.post(
+   '/api/invitations',
+   authenticate,
+   requireRole('ADMIN'),
+   invitationController.create
+);
+router.get(
+   '/api/invitations',
+   authenticate,
+   requireRole('ADMIN'),
+   invitationController.list
+);
+router.delete(
+   '/api/invitations/:id',
+   authenticate,
+   requireRole('ADMIN'),
+   invitationController.revoke
+);
+
+router.get(
+   '/api/users',
+   authenticate,
+   requireRole('ADMIN'),
+   userController.list
+);
+router.delete(
+   '/api/users/:id',
+   authenticate,
+   requireRole('ADMIN'),
+   userController.delete
+);
+
+// ─── Chat (public) ───────────────────────────────────────────────────────────
+router.post('/api/chat', chatController.sendMessage);
 router.post('/api/chat/extract-order', chatController.extractOrder);
 
+// ─── Events ──────────────────────────────────────────────────────────────────
 // POST /api/events - create event.
 // Request:
 // {
@@ -57,6 +110,7 @@ router.patch('/api/events/:id', eventController.updateEvent);
 // DELETE /api/events/:id - delete event.
 router.delete('/api/events/:id', eventController.deleteEvent);
 
+// ─── Menu Items ──────────────────────────────────────────────────────────────
 // POST /api/menu-items - create menu item for an event.
 // Request:
 // {
@@ -104,6 +158,7 @@ router.patch('/api/menu-items/:id', menuItemController.updateMenuItem);
 // DELETE /api/menu-items/:id - delete menu item.
 router.delete('/api/menu-items/:id', menuItemController.deleteMenuItem);
 
+// ─── Orders ──────────────────────────────────────────────────────────────────
 // POST /api/orders - create order for menu items.
 // Request:
 // {
