@@ -20,10 +20,13 @@ export default function LoginPage() {
       setLoading(true);
 
       try {
-         const loggedUser = await login(email, password);
-         navigate(
-            loggedUser.role === 'ADMIN' ? '/admin/invitations' : '/admin/events'
-         );
+         const user = await login(email, password);
+         // Redirect based on user role
+         if (user.role === 'ADMIN') {
+            navigate('/admin/invitations');
+         } else {
+            navigate('/dashboard');
+         }
       } catch (err) {
          if (isAxiosError(err) && err.response?.data?.error) {
             setError(err.response.data.error);
