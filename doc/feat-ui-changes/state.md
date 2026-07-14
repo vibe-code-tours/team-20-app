@@ -1,5 +1,31 @@
 # State Log — feat/ui-changes
 
+## [2026-07-14 10:45 AM] feature: Redesign event card banner with premium visual effects and polished UI
+
+### Changes Made
+
+**Files modified:**
+- `src/components/events/EventCard.tsx` — Premium banner redesign:
+  - Taller banner (h-52) with multi-layer gradient overlays (depth + shimmer on hover)
+  - Frosted glass date badge (backdrop-blur, semi-transparent, border glow)
+  - Glowing status badge with colored shadow ring (emerald/amber/red)
+  - Event title overlaid on banner bottom with drop shadow for impact
+  - Decorative SVG wave curve separating banner from card body
+  - Icon containers for each detail row (Calendar, MapPin, Clock, Info, User) with primary-tinted backgrounds
+  - Buttons upgraded: "View Menu" with Utensils icon + shadow glow, "Learn More" with ArrowRight icon + hover translate
+  - Smoother hover transitions (700ms scale, 500ms shadow, border glow)
+
+## [2026-07-14 10:30 AM] feature: Redesign event cards with banner, status badge, info details, and action buttons
+
+### Changes Made
+
+**New files created:**
+- `src/components/events/EventCard.tsx` — Shared event card component with: banner image, date badge overlay, status badge (Open/Closing Soon/Closed based on preOrderClose), event title, formatted date, location, pre-order closing date, info, hostedBy, "View Menu" primary button (→ `/events/:eventId/order`), "Learn More" secondary button (→ `/events/:eventId`)
+
+**Files modified:**
+- `src/pages/EventsPage.tsx` — Replaced inline card JSX with shared EventCard component, removed duplicate badgeColors array, updated loading skeleton to match new card shape
+- `src/pages/HomePage.tsx` — Replaced inline card JSX with shared EventCard component, removed duplicate badgeColors array, updated loading skeleton to match new card shape
+
 ## [2026-07-13 04:35 PM] feature: Redesign About Us page with creative layout, images, and animations
 
 ### Changes Made
