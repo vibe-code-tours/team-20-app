@@ -11,6 +11,7 @@ import MenuOrderingPage from './pages/MenuOrderingPage';
 import CheckoutPage from './pages/CheckoutPage';
 import PaymentUploadPage from './pages/PaymentUploadPage';
 import OrderConfirmationPage from './pages/OrderConfirmationPage';
+import OrderTrackingPage from './pages/OrderTrackingPage';
 import ContactPage from './pages/ContactPage';
 import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
@@ -45,6 +46,10 @@ export default function App() {
                      <Route
                         path="/order-confirmation"
                         element={<OrderConfirmationPage />}
+                     />
+                     <Route
+                        path="/order-tracking/:orderNumber"
+                        element={<OrderTrackingPage />}
                      />
                      <Route path="/contact" element={<ContactPage />} />
                   </Route>
