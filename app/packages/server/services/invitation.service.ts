@@ -44,4 +44,25 @@ export const invitationService = {
       }
       await invitationRepository.delete(id);
    },
+
+   async checkStatus(code: string) {
+      const invitation = await invitationRepository.findByCode(code);
+
+      if (!invitation) {
+         return { valid: false, reason: 'Invalid invitation code' };
+      }
+
+      if (invitation.usedAt) {
+         return {
+            valid: false,
+            reason: 'Invitation code has already been used',
+         };
+      }
+
+      if (new Date() > invitation.expiresAt) {
+         return { valid: false, reason: 'Invitation code has expired' };
+      }
+
+      return { valid: true, role: invitation.role };
+   },
 };

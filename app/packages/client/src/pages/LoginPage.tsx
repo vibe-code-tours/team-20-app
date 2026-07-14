@@ -1,14 +1,17 @@
 import { useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate, useLocation, Link } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { isAxiosError } from 'axios';
 
 export default function LoginPage() {
    const navigate = useNavigate();
+   const location = useLocation();
    const { login } = useAuth();
    const [email, setEmail] = useState('');
    const [password, setPassword] = useState('');
-   const [error, setError] = useState('');
+   const [error, setError] = useState(
+      (location.state as { message?: string })?.message || ''
+   );
    const [loading, setLoading] = useState(false);
 
    const handleSubmit = async (e: React.FormEvent) => {

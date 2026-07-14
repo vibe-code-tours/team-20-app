@@ -62,4 +62,24 @@ export const invitationController = {
          return res.status(400).json({ error: message });
       }
    },
+
+   async checkStatus(req: Request, res: Response) {
+      try {
+         const code = req.params.code;
+         if (!code) {
+            return res
+               .status(400)
+               .json({ error: 'Invitation code is required' });
+         }
+
+         const result = await invitationService.checkStatus(code);
+         return res.json(result);
+      } catch (error) {
+         const message =
+            error instanceof Error
+               ? error.message
+               : 'Failed to check invitation status';
+         return res.status(400).json({ error: message });
+      }
+   },
 };

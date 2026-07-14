@@ -1,8 +1,9 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams, Link } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { isAxiosError } from 'axios';
 import { Eye, EyeOff } from 'lucide-react';
+import api from '@/lib/api';
 
 export default function RegisterPage() {
    const navigate = useNavigate();
@@ -18,6 +19,42 @@ export default function RegisterPage() {
    const [error, setError] = useState('');
    const [success, setSuccess] = useState(false);
    const [loading, setLoading] = useState(false);
+   const [checkingCode, setCheckingCode] = useState(true);
+
+   // Check invitation status on mount
+   useEffect(() => {
+      const checkInvitation = async () => {
+         const codeFromUrl = searchParams.get('code');
+         if (!codeFromUrl) {
+            setCheckingCode(false);
+            return;
+         }
+
+         try {
+            const { data } = await api.get(`/invitations/check/${codeFromUrl}`);
+            if (!data.valid) {
+               navigate('/login', {
+                  replace: true,
+                  state: { message: data.reason },
+               });
+            }
+         } catch {
+            navigate('/login', { replace: true });
+         } finally {
+            setCheckingCode(false);
+         }
+      };
+
+      checkInvitation();
+   }, [searchParams, navigate]);
+
+   if (checkingCode) {
+      return (
+         <div className="min-h-screen flex items-center justify-center bg-background">
+            <p className="text-muted-foreground">Checking invitation...</p>
+         </div>
+      );
+   }
 
    const handleSubmit = async (e: React.FormEvent) => {
       e.preventDefault();

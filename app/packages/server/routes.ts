@@ -30,6 +30,9 @@ router.post('/api/auth/register', authController.register);
 router.post('/api/auth/login', rateLimitLogin, authController.login);
 router.post('/api/auth/refresh', authController.refresh);
 
+// ─── Invitation status (public, for register page) ───────────────────────────
+router.get('/api/invitations/check/:code', invitationController.checkStatus);
+
 // ─── Auth routes (authenticated) ─────────────────────────────────────────────
 
 router.get('/api/auth/me', authenticate, authController.me);
