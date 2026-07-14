@@ -139,6 +139,14 @@
    background: rgba(25, 23, 48, 0.7);
    border: 1px solid rgba(200, 180, 120, 0.1);
 }
+.glass-solid {
+   background: rgba(255, 252, 245, 1);
+   border: 1px solid rgba(200, 170, 120, 0.22);
+}
+.dark .glass-solid {
+   background: rgba(25, 23, 48, 1);
+   border: 1px solid rgba(200, 180, 120, 0.1);
+}
 .glass-subtle {
    background: rgba(255, 252, 245, 0.35);
    backdrop-filter: blur(12px) saturate(160%);
