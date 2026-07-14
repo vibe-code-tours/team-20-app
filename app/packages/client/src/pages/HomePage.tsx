@@ -1,6 +1,8 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import axios from 'axios';
+import { motion, AnimatePresence } from 'framer-motion';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
 
 type Event = {
    id: number;
@@ -14,19 +16,59 @@ type Event = {
 };
 
 const badgeColors = [
-   'bg-rose-600',
-   'bg-sky-600',
-   'bg-emerald-600',
-   'bg-amber-600',
-   'bg-violet-600',
-   'bg-teal-600',
-   'bg-orange-600',
-   'bg-indigo-600',
+   'bg-amber-700',
+   'bg-orange-700',
+   'bg-emerald-700',
+   'bg-rose-700',
+   'bg-teal-700',
+   'bg-red-800',
+   'bg-yellow-700',
+   'bg-stone-700',
+];
+
+/* Hero carousel slides — food images for community fundraising */
+const heroSlides = [
+   {
+      image: 'https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=1200&q=80',
+      title: 'Delicious Food,\nDelivered to You',
+      subtitle:
+         'Support community events by ordering your favourite dishes online.',
+   },
+   {
+      image: 'https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?w=1200&q=80',
+      title: 'Freshly Prepared,\nMade with Love',
+      subtitle:
+         'Browse menus from local cooks and pre-order for upcoming events.',
+   },
+   {
+      image: 'https://images.unsplash.com/photo-1567620905732-2d1ec7ab7445?w=1200&q=80',
+      title: 'Order Ahead,\nSkip the Queue',
+      subtitle: 'Fast, easy ordering — upload payment and confirm in minutes.',
+   },
 ];
 
 export default function HomePage() {
    const [events, setEvents] = useState<Event[]>([]);
    const [loading, setLoading] = useState(true);
+
+   /* Hero carousel state */
+   const [currentSlide, setCurrentSlide] = useState(0);
+
+   const nextSlide = useCallback(() => {
+      setCurrentSlide((prev) => (prev + 1) % heroSlides.length);
+   }, []);
+
+   const prevSlide = useCallback(() => {
+      setCurrentSlide(
+         (prev) => (prev - 1 + heroSlides.length) % heroSlides.length
+      );
+   }, []);
+
+   // Auto-rotate every 5 seconds
+   useEffect(() => {
+      const timer = setInterval(nextSlide, 5000);
+      return () => clearInterval(timer);
+   }, [nextSlide]);
 
    useEffect(() => {
       axios
@@ -36,31 +78,96 @@ export default function HomePage() {
          .finally(() => setLoading(false));
    }, []);
 
+   const slide = heroSlides[currentSlide];
+
    return (
       <div>
-         {/* Hero */}
-         <section className="bg-muted">
-            <div className="max-w-6xl mx-auto px-4 py-20 text-center">
-               <h1 className="text-5xl font-bold mb-4">
-                  Order delicious food for community fundraising events
-               </h1>
-               <p className="text-lg text-muted-foreground mb-8 max-w-2xl mx-auto">
-                  Browse upcoming events, select your favourite menu items, and
-                  place your order — all in one place.
-               </p>
-               <div className="flex items-center justify-center gap-4">
-                  <Link
-                     to="/events"
-                     className="bg-primary text-primary-foreground px-6 py-3 rounded-md text-sm font-medium hover:opacity-90 transition-opacity"
+         {/* Hero — Animated Carousel */}
+         <section className="relative h-[520px] md:h-[600px] overflow-hidden bg-black">
+            {/* Background images */}
+            <AnimatePresence mode="wait">
+               <motion.div
+                  key={currentSlide}
+                  initial={{ opacity: 0, scale: 1.05 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0, scale: 0.98 }}
+                  transition={{ duration: 0.7, ease: 'easeInOut' }}
+                  className="absolute inset-0"
+               >
+                  <img
+                     src={slide.image}
+                     alt=""
+                     className="h-full w-full object-cover"
+                  />
+                  {/* Gradient overlay for text readability */}
+                  <div className="absolute inset-0 bg-gradient-to-r from-black/70 via-black/40 to-transparent" />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
+               </motion.div>
+            </AnimatePresence>
+
+            {/* Text overlay */}
+            <div className="relative z-10 max-w-6xl mx-auto px-4 h-full flex flex-col justify-center">
+               <AnimatePresence mode="wait">
+                  <motion.div
+                     key={currentSlide}
+                     initial={{ opacity: 0, y: 30 }}
+                     animate={{ opacity: 1, y: 0 }}
+                     exit={{ opacity: 0, y: -20 }}
+                     transition={{ duration: 0.5, delay: 0.15 }}
                   >
-                     Browse Events
-                  </Link>
-                  <a
-                     href="#how-it-works"
-                     className="border border-border px-6 py-3 rounded-md text-sm font-medium hover:bg-accent transition-colors"
-                  >
-                     Learn More
-                  </a>
+                     <h1 className="text-4xl md:text-6xl font-bold text-white mb-4 leading-tight whitespace-pre-line drop-shadow-lg">
+                        {slide.title}
+                     </h1>
+                     <p className="text-lg md:text-xl text-white/80 mb-8 max-w-xl drop-shadow-md">
+                        {slide.subtitle}
+                     </p>
+                     <div className="flex items-center gap-4">
+                        <Link
+                           to="/events"
+                           className="glass-subtle text-white px-7 py-3.5 rounded-full text-sm font-semibold hover:scale-105 transition-all duration-300 shadow-lg"
+                        >
+                           Browse Events
+                        </Link>
+                        <a
+                           href="#how-it-works"
+                           className="glass-subtle text-white px-7 py-3.5 rounded-full text-sm font-semibold hover:scale-105 transition-all duration-300"
+                        >
+                           Learn More
+                        </a>
+                     </div>
+                  </motion.div>
+               </AnimatePresence>
+
+               {/* Navigation arrows */}
+               <button
+                  onClick={prevSlide}
+                  className="absolute left-4 top-1/2 -translate-y-1/2 z-20 flex h-10 w-10 items-center justify-center rounded-full bg-white/15 text-white backdrop-blur-sm hover:bg-white/25 transition-colors border border-white/20"
+                  aria-label="Previous slide"
+               >
+                  <ChevronLeft className="h-5 w-5" />
+               </button>
+               <button
+                  onClick={nextSlide}
+                  className="absolute right-4 top-1/2 -translate-y-1/2 z-20 flex h-10 w-10 items-center justify-center rounded-full bg-white/15 text-white backdrop-blur-sm hover:bg-white/25 transition-colors border border-white/20"
+                  aria-label="Next slide"
+               >
+                  <ChevronRight className="h-5 w-5" />
+               </button>
+
+               {/* Dot indicators */}
+               <div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-20 flex gap-2.5">
+                  {heroSlides.map((_, i) => (
+                     <button
+                        key={i}
+                        onClick={() => setCurrentSlide(i)}
+                        className={`h-2 rounded-full transition-all duration-300 ${
+                           i === currentSlide
+                              ? 'w-8 bg-white'
+                              : 'w-2 bg-white/40 hover:bg-white/60'
+                        }`}
+                        aria-label={`Go to slide ${i + 1}`}
+                     />
+                  ))}
                </div>
             </div>
          </section>
@@ -74,7 +181,7 @@ export default function HomePage() {
                   {[1, 2, 3].map((i) => (
                      <div
                         key={i}
-                        className="rounded-xl border border-border overflow-hidden animate-pulse"
+                        className="rounded-xl glass-card overflow-hidden animate-pulse"
                      >
                         <div className="h-12 bg-muted" />
                         <div className="p-5 space-y-3">
@@ -86,7 +193,7 @@ export default function HomePage() {
                   ))}
                </div>
             ) : events.length === 0 ? (
-               <div className="text-center py-12 border border-dashed border-border rounded-xl">
+               <div className="text-center py-12 glass-card rounded-xl">
                   <p className="text-muted-foreground">
                      No upcoming events at the moment. Check back soon!
                   </p>
@@ -108,7 +215,7 @@ export default function HomePage() {
                         <Link
                            key={event.id}
                            to={`/events/${event.id}`}
-                           className={`group block rounded-xl border border-border overflow-visible hover:shadow-lg transition-shadow ${
+                           className={`group block rounded-xl overflow-visible glass-card hover:shadow-lg transition-all duration-300 hover:scale-[1.02] ${
                               event.iconUrl ? 'mb-7' : ''
                            }`}
                         >
@@ -173,13 +280,13 @@ export default function HomePage() {
          </section>
 
          {/* How It Works */}
-         <section id="how-it-works" className="bg-muted">
+         <section id="how-it-works" className="bg-muted/50">
             <div className="max-w-6xl mx-auto px-4 py-16">
                <h2 className="text-2xl font-bold mb-8 text-center">
                   How It Works
                </h2>
-               <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-                  <div className="text-center">
+               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                  <div className="text-center glass-card rounded-2xl p-8 transition-all duration-300 hover:scale-[1.03]">
                      <div className="w-10 h-10 rounded-full bg-primary text-primary-foreground flex items-center justify-center font-bold mx-auto mb-3">
                         1
                      </div>
@@ -189,7 +296,7 @@ export default function HomePage() {
                         items.
                      </p>
                   </div>
-                  <div className="text-center">
+                  <div className="text-center glass-card rounded-2xl p-8 transition-all duration-300 hover:scale-[1.03]">
                      <div className="w-10 h-10 rounded-full bg-primary text-primary-foreground flex items-center justify-center font-bold mx-auto mb-3">
                         2
                      </div>
@@ -199,7 +306,7 @@ export default function HomePage() {
                         minutes.
                      </p>
                   </div>
-                  <div className="text-center">
+                  <div className="text-center glass-card rounded-2xl p-8 transition-all duration-300 hover:scale-[1.03]">
                      <div className="w-10 h-10 rounded-full bg-primary text-primary-foreground flex items-center justify-center font-bold mx-auto mb-3">
                         3
                      </div>

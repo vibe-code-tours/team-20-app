@@ -1,20 +1,10 @@
 import type { Request, Response } from 'express';
 import multer from 'multer';
-import path from 'path';
-import { prisma } from '../prisma';
+import { paymentService } from '../services/payment.service';
 
-// Configure multer for local storage
-const storage = multer.diskStorage({
-   destination: path.join(__dirname, '..', 'uploads'),
-   filename: (req, file, cb) => {
-      const orderNumber = req.params.orderNumber;
-      const ext = path.extname(file.originalname);
-      cb(null, `${orderNumber}-${Date.now()}${ext}`);
-   },
-});
-
+// Configure multer for memory storage (buffer for S3 upload)
 const upload = multer({
-   storage,
+   storage: multer.memoryStorage(),
    limits: { fileSize: 5 * 1024 * 1024 }, // 5MB
    fileFilter: (_req, file, cb) => {
       const allowed = ['image/jpeg', 'image/png', 'image/webp'];
@@ -26,9 +16,8 @@ const upload = multer({
    },
 });
 
-export const uploadPaymentScreenshot = [
-   upload.single('paymentScreenshot'),
-   async (req: Request, res: Response) => {
+export const paymentController = {
+   async uploadPaymentScreenshot(req: Request, res: Response) {
       try {
          const orderNumber = Array.isArray(req.params.orderNumber)
             ? req.params.orderNumber[0]
@@ -42,30 +31,25 @@ export const uploadPaymentScreenshot = [
             return res.status(400).json({ error: 'No file uploaded' });
          }
 
-         const order = await prisma.order.findUnique({
-            where: { orderNumber },
-         });
+         const result = await paymentService.uploadPaymentScreenshot(
+            orderNumber,
+            req.file
+         );
 
-         if (!order) {
-            return res.status(404).json({ error: 'Order not found' });
-         }
-
-         const screenshotUrl = `/uploads/${req.file.filename}`;
-
-         await prisma.order.update({
-            where: { orderNumber },
-            data: { paymentScreenshotUrl: screenshotUrl },
-         });
-
-         return res.json({
-            message: 'Payment screenshot uploaded successfully',
-            url: screenshotUrl,
-         });
+         return res.json(result);
       } catch (error) {
-         console.error('uploadPaymentScreenshot error:', error);
-         return res
-            .status(500)
-            .json({ error: 'Failed to upload payment screenshot' });
+         const message =
+            error instanceof Error
+               ? error.message
+               : 'Failed to upload payment screenshot';
+         const status = message === 'Order not found' ? 404 : 500;
+         return res.status(status).json({ error: message });
       }
    },
+};
+
+// Export multer middleware for use in routes
+export const uploadPaymentScreenshot = [
+   upload.single('paymentScreenshot'),
+   paymentController.uploadPaymentScreenshot,
 ];
