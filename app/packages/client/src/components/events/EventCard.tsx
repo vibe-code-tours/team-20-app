@@ -22,14 +22,16 @@ export type EventCardData = {
 
 function getStatus(preOrderClose: string | null): {
    label: string;
-   color: string;
-   glow: string;
+   dot: string;
+   text: string;
+   border: string;
 } {
    if (!preOrderClose)
       return {
          label: 'Open',
-         color: 'bg-emerald-500',
-         glow: 'shadow-[0_0_8px_rgba(16,185,129,0.5)]',
+         dot: 'bg-emerald-400',
+         text: 'text-emerald-700 dark:text-emerald-300',
+         border: 'border-emerald-400/30',
       };
    const now = new Date();
    const closeDate = new Date(preOrderClose);
@@ -39,20 +41,23 @@ function getStatus(preOrderClose: string | null): {
    if (diffHours < 0) {
       return {
          label: 'Closed',
-         color: 'bg-red-500',
-         glow: 'shadow-[0_0_8px_rgba(239,68,68,0.5)]',
+         dot: 'bg-red-400',
+         text: 'text-red-700 dark:text-red-300',
+         border: 'border-red-400/30',
       };
    } else if (diffHours <= 24) {
       return {
          label: 'Closing Soon',
-         color: 'bg-amber-500',
-         glow: 'shadow-[0_0_8px_rgba(245,158,11,0.5)]',
+         dot: 'bg-amber-400',
+         text: 'text-amber-700 dark:text-amber-300',
+         border: 'border-amber-400/30',
       };
    }
    return {
       label: 'Open',
-      color: 'bg-emerald-500',
-      glow: 'shadow-[0_0_8px_rgba(16,185,129,0.5)]',
+      dot: 'bg-emerald-400',
+      text: 'text-emerald-700 dark:text-emerald-300',
+      border: 'border-emerald-400/30',
    };
 }
 
@@ -80,99 +85,85 @@ export default function EventCard({ event }: { event: EventCardData }) {
       : null;
 
    return (
-      <div className="group rounded-2xl border border-border/60 overflow-hidden bg-card hover:shadow-2xl hover:shadow-primary/5 transition-all duration-500 hover:scale-[1.02] flex flex-col">
-         {/* ── Banner ── */}
-         <div className="relative h-52 overflow-hidden">
+      <div className="group rounded-2xl overflow-hidden bg-card border border-border/40 hover:shadow-[0_20px_60px_-12px_rgba(0,0,0,0.25)] transition-all duration-500 hover:scale-[1.015] flex flex-col">
+         {/* ── Luxury Banner ── */}
+         <div className="relative h-56 overflow-hidden">
             {/* Background image */}
             {event.iconUrl ? (
                <img
                   src={event.iconUrl}
                   alt={event.name}
-                  className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700 ease-out"
+                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-[800ms] ease-out"
                />
             ) : (
-               <div className="w-full h-full bg-gradient-to-br from-primary via-primary/80 to-accent" />
+               <div className="w-full h-full bg-gradient-to-br from-[#1a1a2e] via-[#16213e] to-[#0f3460]" />
             )}
 
-            {/* Multi-layer gradient overlay for depth */}
-            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
-            <div className="absolute inset-0 bg-gradient-to-r from-black/30 via-transparent to-black/10" />
-            {/* Subtle shimmer on hover */}
-            <div className="absolute inset-0 bg-white/0 group-hover:bg-white/5 transition-colors duration-500" />
+            {/* Luxury dark overlay — rich vignette */}
+            <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/30 to-black/10" />
+            <div className="absolute inset-0 bg-gradient-to-r from-black/40 via-transparent to-black/20" />
+            {/* Subtle vignette edges */}
+            <div className="absolute inset-0 shadow-[inset_0_0_80px_rgba(0,0,0,0.4)]" />
 
-            {/* ── Date badge (frosted glass) ── */}
-            <div className="absolute top-3 left-3 backdrop-blur-md bg-white/90 dark:bg-black/60 rounded-xl shadow-xl border border-white/40 px-3 py-2.5 text-center min-w-[56px]">
-               <div className="text-2xl font-extrabold text-gray-900 dark:text-white leading-none">
+            {/* ── Date badge — elegant glass with gold accent ── */}
+            <div className="absolute top-4 left-4 backdrop-blur-xl bg-white/80 dark:bg-white/10 rounded-2xl shadow-2xl border border-white/50 dark:border-white/20 px-3.5 py-3 text-center min-w-[60px]">
+               <div className="text-[28px] font-black text-gray-900 dark:text-white leading-none tracking-tight">
                   {dayNum}
                </div>
-               <div className="text-[10px] font-bold text-primary uppercase tracking-[0.15em] mt-1">
+               <div className="text-[10px] font-bold text-[#C9A96E] uppercase tracking-[0.2em] mt-1.5">
                   {month}
                </div>
             </div>
 
-            {/* ── Status badge (glowing) ── */}
-            <div className="absolute top-3 right-3">
+            {/* ── Status badge — refined pill ── */}
+            <div className="absolute top-4 right-4">
                <span
-                  className={`${status.color} ${status.glow} text-white text-[11px] font-bold px-3.5 py-1.5 rounded-full backdrop-blur-sm tracking-wide uppercase`}
+                  className={`inline-flex items-center gap-1.5 backdrop-blur-md bg-white/80 dark:bg-black/50 ${status.text} ${status.border} border text-[11px] font-semibold px-3 py-1.5 rounded-full tracking-wide`}
                >
+                  <span className={`w-1.5 h-1.5 rounded-full ${status.dot}`} />
                   {status.label}
                </span>
             </div>
 
-            {/* ── Title overlaid on banner bottom ── */}
-            <div className="absolute bottom-0 left-0 right-0 p-4 pb-5">
-               <h3 className="text-xl font-bold text-white leading-tight drop-shadow-lg line-clamp-2">
-                  {event.name}
-               </h3>
-            </div>
+            {/* ── Title + subtitle area at bottom ── */}
+            <div className="absolute bottom-0 left-0 right-0 z-10">
+               {/* Gold accent line */}
+               <div className="mx-5 mb-3 h-px bg-gradient-to-r from-transparent via-[#C9A96E]/60 to-transparent" />
 
-            {/* Decorative bottom wave */}
-            <svg
-               className="absolute bottom-0 left-0 right-0 w-full h-6 text-card"
-               viewBox="0 0 400 24"
-               preserveAspectRatio="none"
-            >
-               <path
-                  d="M0,24 L0,12 Q100,0 200,12 Q300,24 400,12 L400,24 Z"
-                  fill="currentColor"
-               />
-            </svg>
+               <div className="px-5 pb-5">
+                  <h3 className="text-[22px] font-bold text-white leading-tight tracking-tight line-clamp-2 drop-shadow-md">
+                     {event.name}
+                  </h3>
+               </div>
+            </div>
          </div>
 
          {/* ── Card body ── */}
-         <div className="p-5 pt-3 flex flex-col flex-1">
+         <div className="p-5 pt-4 flex flex-col flex-1">
             {/* Event date */}
-            <div className="flex items-center gap-2.5 text-sm text-muted-foreground">
-               <div className="w-7 h-7 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
-                  <Calendar className="w-3.5 h-3.5 text-primary" />
-               </div>
+            <div className="flex items-center gap-3 text-sm text-muted-foreground">
+               <Calendar className="w-4 h-4 shrink-0 text-[#C9A96E]" />
                <span className="font-medium">{fullDate}</span>
             </div>
 
             {/* Location */}
-            <div className="flex items-center gap-2.5 mt-2.5 text-sm text-muted-foreground">
-               <div className="w-7 h-7 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
-                  <MapPin className="w-3.5 h-3.5 text-primary" />
-               </div>
+            <div className="flex items-center gap-3 mt-2.5 text-sm text-muted-foreground">
+               <MapPin className="w-4 h-4 shrink-0 text-[#C9A96E]" />
                <span>{event.location}</span>
             </div>
 
             {/* Pre-order closing date */}
             {preOrderCloseFormatted && (
-               <div className="flex items-center gap-2.5 mt-2.5 text-sm text-muted-foreground">
-                  <div className="w-7 h-7 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
-                     <Clock className="w-3.5 h-3.5 text-primary" />
-                  </div>
+               <div className="flex items-center gap-3 mt-2.5 text-sm text-muted-foreground">
+                  <Clock className="w-4 h-4 shrink-0 text-[#C9A96E]" />
                   <span>Pre-order closes: {preOrderCloseFormatted}</span>
                </div>
             )}
 
             {/* Info */}
             {event.eventInfo && (
-               <div className="flex items-start gap-2.5 mt-3 text-sm text-muted-foreground">
-                  <div className="w-7 h-7 rounded-lg bg-primary/10 flex items-center justify-center shrink-0 mt-0.5">
-                     <Info className="w-3.5 h-3.5 text-primary" />
-                  </div>
+               <div className="flex items-start gap-3 mt-3 text-sm text-muted-foreground">
+                  <Info className="w-4 h-4 shrink-0 mt-0.5 text-[#C9A96E]" />
                   <p className="line-clamp-2 leading-relaxed">
                      {event.eventInfo}
                   </p>
@@ -181,10 +172,8 @@ export default function EventCard({ event }: { event: EventCardData }) {
 
             {/* Hosted by */}
             {event.hostedBy && (
-               <div className="flex items-center gap-2.5 mt-3 text-sm text-muted-foreground">
-                  <div className="w-7 h-7 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
-                     <User className="w-3.5 h-3.5 text-primary" />
-                  </div>
+               <div className="flex items-center gap-3 mt-3 text-sm text-muted-foreground">
+                  <User className="w-4 h-4 shrink-0 text-[#C9A96E]" />
                   <span>
                      Hosted by{' '}
                      <span className="font-semibold text-foreground">
@@ -194,21 +183,21 @@ export default function EventCard({ event }: { event: EventCardData }) {
                </div>
             )}
 
-            {/* Spacer to push buttons to bottom */}
+            {/* Spacer */}
             <div className="flex-1" />
 
             {/* ── Buttons ── */}
             <div className="flex gap-3 mt-5">
                <Link
                   to={`/events/${event.id}/order`}
-                  className="flex-1 flex items-center justify-center gap-2 bg-primary text-primary-foreground py-2.5 rounded-xl text-sm font-semibold hover:brightness-110 hover:shadow-lg hover:shadow-primary/25 transition-all duration-300"
+                  className="flex-1 flex items-center justify-center gap-2 bg-gradient-to-r from-[#C9A96E] to-[#B8945F] text-white py-2.5 rounded-xl text-sm font-semibold shadow-md shadow-[#C9A96E]/20 hover:shadow-lg hover:shadow-[#C9A96E]/30 hover:brightness-110 transition-all duration-300"
                >
                   <Utensils className="w-4 h-4" />
                   View Menu
                </Link>
                <Link
                   to={`/events/${event.id}`}
-                  className="flex-1 flex items-center justify-center gap-2 border border-border py-2.5 rounded-xl text-sm font-semibold text-foreground hover:bg-muted/80 hover:border-primary/30 transition-all duration-300"
+                  className="flex-1 flex items-center justify-center gap-2 border border-[#C9A96E]/30 text-[#C9A96E] py-2.5 rounded-xl text-sm font-semibold hover:bg-[#C9A96E]/10 hover:border-[#C9A96E]/50 transition-all duration-300"
                >
                   Learn More
                   <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
