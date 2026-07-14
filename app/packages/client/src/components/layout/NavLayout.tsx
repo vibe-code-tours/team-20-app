@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { Link, NavLink, Outlet } from 'react-router-dom';
 import { Menu, X } from 'lucide-react';
 import ThemeToggle from '../theme/ThemeToggle';
+import { useAuth } from '@/contexts/AuthContext';
 
 const navLinks = [
    { to: '/', label: 'Home' },
@@ -14,6 +15,8 @@ export default function NavLayout() {
    const [scrolled, setScrolled] = useState(false);
    const [mobileOpen, setMobileOpen] = useState(false);
    const [menuVisible, setMenuVisible] = useState(false);
+
+   const { user, isAuthenticated, logout, hasRole } = useAuth();
 
    useEffect(() => {
       const onScroll = () => setScrolled(window.scrollY > 50);
@@ -90,6 +93,40 @@ export default function NavLayout() {
                         {link.label}
                      </NavLink>
                   ))}
+                  {isAuthenticated && hasRole('ADMIN') && (
+                     <NavLink
+                        to="/admin/invitations"
+                        className={({ isActive }) =>
+                           `px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
+                              isActive
+                                 ? 'text-foreground glass'
+                                 : 'text-muted-foreground hover:text-foreground hover:bg-accent/30'
+                           }`
+                        }
+                     >
+                        Admin
+                     </NavLink>
+                  )}
+                  {isAuthenticated ? (
+                     <div className="flex items-center gap-3 ml-2 pl-2 border-l border-border">
+                        <span className="text-sm text-muted-foreground">
+                           {user?.name}
+                        </span>
+                        <button
+                           onClick={logout}
+                           className="text-sm text-muted-foreground hover:text-foreground cursor-pointer"
+                        >
+                           Sign out
+                        </button>
+                     </div>
+                  ) : (
+                     <NavLink
+                        to="/login"
+                        className="px-3 py-2 rounded-lg text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-accent/30"
+                     >
+                        Sign in
+                     </NavLink>
+                  )}
                   <div className="ml-2 pl-2 border-l border-border">
                      <ThemeToggle />
                   </div>
@@ -148,6 +185,39 @@ export default function NavLayout() {
                         {link.label}
                      </NavLink>
                   ))}
+                  {isAuthenticated && hasRole('ADMIN') && (
+                     <NavLink
+                        to="/admin/invitations"
+                        onClick={() => setMobileOpen(false)}
+                        className="w-48 text-center px-4 py-3 rounded-xl text-base font-medium text-muted-foreground hover:text-foreground glass"
+                     >
+                        Admin
+                     </NavLink>
+                  )}
+                  {isAuthenticated ? (
+                     <div className="flex items-center gap-3 mt-4">
+                        <span className="text-sm text-muted-foreground">
+                           {user?.name}
+                        </span>
+                        <button
+                           onClick={() => {
+                              logout();
+                              setMobileOpen(false);
+                           }}
+                           className="text-sm text-muted-foreground hover:text-foreground cursor-pointer"
+                        >
+                           Sign out
+                        </button>
+                     </div>
+                  ) : (
+                     <NavLink
+                        to="/login"
+                        onClick={() => setMobileOpen(false)}
+                        className="w-48 text-center px-4 py-3 rounded-xl text-base font-medium text-muted-foreground hover:text-foreground glass"
+                     >
+                        Sign in
+                     </NavLink>
+                  )}
                </div>
             </div>
          </header>
