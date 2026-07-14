@@ -13,12 +13,23 @@ const navLinks = [
 export default function NavLayout() {
    const [scrolled, setScrolled] = useState(false);
    const [mobileOpen, setMobileOpen] = useState(false);
+   const [menuVisible, setMenuVisible] = useState(false);
 
    useEffect(() => {
       const onScroll = () => setScrolled(window.scrollY > 50);
       window.addEventListener('scroll', onScroll, { passive: true });
       return () => window.removeEventListener('scroll', onScroll);
    }, []);
+
+   // Keep header opaque during menu close animation
+   useEffect(() => {
+      if (mobileOpen) {
+         setMenuVisible(true);
+      } else {
+         const timer = setTimeout(() => setMenuVisible(false), 300);
+         return () => clearTimeout(timer);
+      }
+   }, [mobileOpen]);
 
    // Lock body scroll when mobile menu is open
    useEffect(() => {
@@ -31,8 +42,10 @@ export default function NavLayout() {
    return (
       <div className="min-h-screen flex flex-col">
          <header
-            className={`sticky top-0 z-50 glass-strong transition-all duration-300 ${
-               scrolled ? 'shadow-sm' : ''
+            className={`sticky top-0 z-50 transition-[height,box-shadow] duration-300 ${
+               scrolled || menuVisible
+                  ? 'glass-solid shadow-sm'
+                  : 'glass-strong'
             }`}
          >
             <nav
@@ -101,7 +114,7 @@ export default function NavLayout() {
 
             {/* Mobile Menu Overlay */}
             <div
-               className={`md:hidden fixed inset-0 top-[var(--mobile-nav-top,64px)] z-40 glass-strong transition-all duration-300 ${
+               className={`md:hidden fixed inset-0 top-[var(--mobile-nav-top,64px)] z-40 glass-solid transition-all duration-300 ${
                   mobileOpen
                      ? 'opacity-100 pointer-events-auto'
                      : 'opacity-0 pointer-events-none'
