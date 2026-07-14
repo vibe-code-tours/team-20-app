@@ -17,6 +17,45 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+enum UserRole {
+  ADMIN
+  ORGANIZER
+}
+
+model User {
+  id        Int      @id @default(autoincrement())
+  email     String   @unique @db.VarChar(255)
+  name      String   @db.VarChar(255)
+  password  String   @db.VarChar(255)
+  role      UserRole @default(ORGANIZER)
+
+  createdInvitations Invitation[] @relation("InvitedBy")
+  usedInvitation     Invitation?  @relation("UsedBy")
+  organizedEvents    Event[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("users")
+}
+
+model Invitation {
+  id        Int      @id @default(autoincrement())
+  code      String   @unique @db.VarChar(20)
+  email     String?  @db.VarChar(255)
+  role      UserRole @default(ORGANIZER)
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdBy Int
+  creator   User     @relation("InvitedBy", fields: [createdBy], references: [id])
+  usedBy    Int?   @unique
+  usedByUser User?   @relation("UsedBy", fields: [usedBy], references: [id])
+
+  createdAt DateTime @default(now())
+
+  @@map("invitations")
+}
+
 model Event {
   id Int @id @default(autoincrement())
 
@@ -33,6 +72,9 @@ model Event {
   location String @db.VarChar(255)
 
   preOrderClose DateTime?
+
+  organizerId Int?
+  organizer   User? @relation(fields: [organizerId], references: [id])
 
   orders    Order[]
   menuItems MenuItem[]
