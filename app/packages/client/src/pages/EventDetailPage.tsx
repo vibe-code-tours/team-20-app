@@ -166,7 +166,7 @@ export default function EventDetailPage() {
             </div>
          )}
 
-         {/* Menu items */}
+         {/* Menu items — hidden for now
          {grouped.length > 0 && (
             <div className="mb-8">
                <h2 className="text-2xl font-bold mb-6">Menu</h2>
@@ -216,6 +216,7 @@ export default function EventDetailPage() {
                </div>
             </div>
          )}
+         */}
 
          {/* Pickup & Payment info */}
          {(event.pickupInfo || event.paymentInfo) && (
