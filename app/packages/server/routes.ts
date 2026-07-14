@@ -9,9 +9,16 @@ import { uploadPaymentScreenshot } from './controllers/payment.controller';
 import { authController } from './controllers/auth.controller';
 import { invitationController } from './controllers/invitation.controller';
 import { userController } from './controllers/user.controller';
+import { dashboardController } from './controllers/dashboard.controller';
+import { exportController } from './controllers/export.controller';
+
 import { authenticate } from './middleware/auth';
 import { requireRole } from './middleware/authorize';
 import { rateLimitLogin } from './middleware/rate-limit';
+import {
+   requireEventOwnership,
+   requireEventOwnershipForBody,
+} from './middleware/ownership';
 
 const router = express.Router();
 
@@ -70,6 +77,79 @@ router.delete(
    authenticate,
    requireRole('ADMIN'),
    userController.delete
+);
+
+// ─── Dashboard (protected) ──────────────────────────────────────────────────────
+
+router.get(
+   '/api/dashboard/:eventId/overview',
+   authenticate,
+   requireRole('ADMIN', 'ORGANIZER'),
+   requireEventOwnership,
+   dashboardController.getOverview
+);
+
+router.get(
+   '/api/dashboard/:eventId/orders',
+   authenticate,
+   requireRole('ADMIN', 'ORGANIZER'),
+   requireEventOwnership,
+   dashboardController.getOrders
+);
+
+router.get(
+   '/api/dashboard/orders/:orderId',
+   authenticate,
+   requireRole('ADMIN', 'ORGANIZER'),
+   dashboardController.getOrderById
+);
+
+router.get(
+   '/api/dashboard/:eventId/menu',
+   authenticate,
+   requireRole('ADMIN', 'ORGANIZER'),
+   requireEventOwnership,
+   dashboardController.getMenuItems
+);
+
+router.patch(
+   '/api/dashboard/orders/:orderId/status',
+   authenticate,
+   requireRole('ADMIN', 'ORGANIZER'),
+   dashboardController.updateOrderStatus
+);
+
+router.get(
+   '/api/dashboard/:eventId/analytics',
+   authenticate,
+   requireRole('ADMIN', 'ORGANIZER'),
+   requireEventOwnership,
+   dashboardController.getAnalytics
+);
+
+// ─── Export (protected) ──────────────────────────────────────────────────────────
+
+router.get(
+   '/api/export/:eventId/orders',
+   authenticate,
+   requireRole('ADMIN', 'ORGANIZER'),
+   requireEventOwnership,
+   exportController.exportOrders
+);
+
+router.get(
+   '/api/export/:eventId/menu',
+   authenticate,
+   requireRole('ADMIN', 'ORGANIZER'),
+   requireEventOwnership,
+   exportController.exportMenu
+);
+
+router.get(
+   '/api/export/orders/:orderId/packing-slip',
+   authenticate,
+   requireRole('ADMIN', 'ORGANIZER'),
+   exportController.generatePackingSlip
 );
 
 // ─── Chat (public) ───────────────────────────────────────────────────────────

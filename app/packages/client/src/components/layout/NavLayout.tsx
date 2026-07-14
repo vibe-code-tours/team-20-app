@@ -107,6 +107,23 @@ export default function NavLayout() {
                         Admin
                      </NavLink>
                   )}
+                  {isAuthenticated &&
+                     (hasRole('ADMIN') || hasRole('ORGANIZER')) && (
+                        <li>
+                           <NavLink
+                              to="/dashboard"
+                              className={({ isActive }) =>
+                                 `text-sm transition-colors ${
+                                    isActive
+                                       ? 'text-foreground font-medium'
+                                       : 'text-muted-foreground hover:text-foreground'
+                                 }`
+                              }
+                           >
+                              Dashboard
+                           </NavLink>
+                        </li>
+                     )}
                   {isAuthenticated ? (
                      <div className="flex items-center gap-3 ml-2 pl-2 border-l border-border">
                         <span className="text-sm text-muted-foreground">
