@@ -1,5 +1,62 @@
 # State Log — feat/ui-changes
 
+## [2026-07-14 11:15 AM] feature: Redesign event card banner with luxury aesthetic — gold accents, elegant overlays, refined typography
+
+### Changes Made
+
+**Files modified:**
+- `src/components/events/EventCard.tsx` — Complete luxury banner redesign:
+  - Removed all low-poly mesh code (LowPolyMesh component, seededRandom, useMemo import)
+  - Rich dark vignette overlay (multi-layer gradients + inset shadow for depth)
+  - Elegant frosted glass date badge with gold (#C9A96E) month text
+  - Refined status badge — glass pill with colored dot indicator, no heavy glow
+  - Gold accent line (gradient fade) separating banner image from title
+  - Event title with tight tracking and bold weight
+  - All detail icons colored in gold (#C9A96E) for cohesive luxury palette
+  - "View Menu" button — gold gradient (#C9A96E → #B8945F) with gold shadow
+  - "Learn More" button — gold border with gold hover background tint
+  - Slower, more refined hover transitions (800ms scale, subtle 1.5% zoom)
+
+## [2026-07-14 11:00 AM] feature: Add low-poly geometric mesh faceted vector overlay to event card banner
+
+### Changes Made
+
+**Files modified:**
+- `src/components/events/EventCard.tsx` — Low-poly geometric mesh banner:
+  - Added `LowPolyMesh` component generating a triangulated SVG grid (8×5 cells, 80 triangles)
+  - Each triangle gets a deterministic vibrant color (orange, rose, fuchsia, amber, red, pink, purple, cyan, emerald) seeded by eventId for consistency
+  - Semi-transparent fills (15-40% opacity) with subtle blur filter for faceted look
+  - White edge lines on each triangle for geometric mesh wireframe effect
+  - Hover state brightens triangles and edge lines
+  - Replaced smooth bottom wave with faceted/zigzag SVG bottom edge matching the geometric theme
+  - Moved cellW/cellH inside useMemo to fix lint warnings
+
+## [2026-07-14 10:45 AM] feature: Redesign event card banner with premium visual effects and polished UI
+
+### Changes Made
+
+**Files modified:**
+- `src/components/events/EventCard.tsx` — Premium banner redesign:
+  - Taller banner (h-52) with multi-layer gradient overlays (depth + shimmer on hover)
+  - Frosted glass date badge (backdrop-blur, semi-transparent, border glow)
+  - Glowing status badge with colored shadow ring (emerald/amber/red)
+  - Event title overlaid on banner bottom with drop shadow for impact
+  - Decorative SVG wave curve separating banner from card body
+  - Icon containers for each detail row (Calendar, MapPin, Clock, Info, User) with primary-tinted backgrounds
+  - Buttons upgraded: "View Menu" with Utensils icon + shadow glow, "Learn More" with ArrowRight icon + hover translate
+  - Smoother hover transitions (700ms scale, 500ms shadow, border glow)
+
+## [2026-07-14 10:30 AM] feature: Redesign event cards with banner, status badge, info details, and action buttons
+
+### Changes Made
+
+**New files created:**
+- `src/components/events/EventCard.tsx` — Shared event card component with: banner image, date badge overlay, status badge (Open/Closing Soon/Closed based on preOrderClose), event title, formatted date, location, pre-order closing date, info, hostedBy, "View Menu" primary button (→ `/events/:eventId/order`), "Learn More" secondary button (→ `/events/:eventId`)
+
+**Files modified:**
+- `src/pages/EventsPage.tsx` — Replaced inline card JSX with shared EventCard component, removed duplicate badgeColors array, updated loading skeleton to match new card shape
+- `src/pages/HomePage.tsx` — Replaced inline card JSX with shared EventCard component, removed duplicate badgeColors array, updated loading skeleton to match new card shape
+
 ## [2026-07-13 04:35 PM] feature: Redesign About Us page with creative layout, images, and animations
 
 ### Changes Made

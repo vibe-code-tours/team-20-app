@@ -3,28 +3,7 @@ import { Link } from 'react-router-dom';
 import axios from 'axios';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
-
-type Event = {
-   id: number;
-   name: string;
-   eventInfo: string | null;
-   iconUrl: string | null;
-   hostedBy: string | null;
-   eventDate: string;
-   location: string;
-   preOrderClose: string | null;
-};
-
-const badgeColors = [
-   'bg-amber-700',
-   'bg-orange-700',
-   'bg-emerald-700',
-   'bg-rose-700',
-   'bg-teal-700',
-   'bg-red-800',
-   'bg-yellow-700',
-   'bg-stone-700',
-];
+import EventCard, { type EventCardData } from '../components/events/EventCard';
 
 /* Hero carousel slides — food images for community fundraising */
 const heroSlides = [
@@ -48,7 +27,7 @@ const heroSlides = [
 ];
 
 export default function HomePage() {
-   const [events, setEvents] = useState<Event[]>([]);
+   const [events, setEvents] = useState<EventCardData[]>([]);
    const [loading, setLoading] = useState(true);
 
    /* Hero carousel state */
@@ -181,100 +160,29 @@ export default function HomePage() {
                   {[1, 2, 3].map((i) => (
                      <div
                         key={i}
-                        className="rounded-xl glass-card overflow-hidden animate-pulse"
+                        className="rounded-2xl border border-border overflow-hidden animate-pulse"
                      >
-                        <div className="h-12 bg-muted" />
+                        <div className="h-44 bg-muted" />
                         <div className="p-5 space-y-3">
-                           <div className="h-4 bg-muted rounded w-20" />
                            <div className="h-6 bg-muted rounded w-3/4" />
+                           <div className="h-4 bg-muted rounded w-1/2" />
+                           <div className="h-4 bg-muted rounded w-2/3" />
                            <div className="h-4 bg-muted rounded w-1/2" />
                         </div>
                      </div>
                   ))}
                </div>
             ) : events.length === 0 ? (
-               <div className="text-center py-12 glass-card rounded-xl">
+               <div className="text-center py-12 glass-card rounded-2xl">
                   <p className="text-muted-foreground">
                      No upcoming events at the moment. Check back soon!
                   </p>
                </div>
             ) : (
                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {events.map((event, index) => {
-                     const date = new Date(event.eventDate);
-                     const dayNum = date.getDate();
-                     const month = date.toLocaleDateString('en-NZ', {
-                        month: 'short',
-                     });
-                     const weekday = date.toLocaleDateString('en-NZ', {
-                        weekday: 'long',
-                     });
-                     const color = badgeColors[index % badgeColors.length]!;
-
-                     return (
-                        <Link
-                           key={event.id}
-                           to={`/events/${event.id}`}
-                           className={`group block rounded-xl overflow-visible glass-card hover:shadow-lg transition-all duration-300 hover:scale-[1.02] ${
-                              event.iconUrl ? 'mb-7' : ''
-                           }`}
-                        >
-                           {/* Date badge */}
-                           <div
-                              className={`${color} text-white px-5 py-3 flex items-baseline gap-2 rounded-t-xl`}
-                           >
-                              <span className="text-3xl font-bold leading-none">
-                                 {dayNum}
-                              </span>
-                              <span className="text-sm font-medium uppercase tracking-wide">
-                                 {month}
-                              </span>
-                           </div>
-
-                           {/* Card body */}
-                           <div
-                              className={`text-center ${event.iconUrl ? 'pt-5 pb-14' : 'p-5'} relative`}
-                           >
-                              <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-1">
-                                 {weekday}
-                              </p>
-                              <h3 className="font-semibold text-lg group-hover:text-primary transition-colors">
-                                 {event.name}
-                              </h3>
-                              <p className="text-sm text-muted-foreground mt-1">
-                                 {event.location}
-                              </p>
-                              {event.hostedBy && (
-                                 <p className="text-xs text-primary font-medium mt-1">
-                                    Hosted by {event.hostedBy}
-                                 </p>
-                              )}
-                              {event.preOrderClose && (
-                                 <p className="text-xs text-muted-foreground mt-2">
-                                    Pre-order closes{' '}
-                                    {new Date(
-                                       event.preOrderClose
-                                    ).toLocaleDateString('en-NZ', {
-                                       month: 'short',
-                                       day: 'numeric',
-                                    })}
-                                 </p>
-                              )}
-
-                              {/* Icon overlapping bottom */}
-                              {event.iconUrl && (
-                                 <div className="absolute left-1/2 -bottom-7 -translate-x-1/2">
-                                    <img
-                                       src={event.iconUrl}
-                                       alt=""
-                                       className="w-14 h-14 rounded-xl border-2 border-border object-cover shadow-md"
-                                    />
-                                 </div>
-                              )}
-                           </div>
-                        </Link>
-                     );
-                  })}
+                  {events.map((event) => (
+                     <EventCard key={event.id} event={event} />
+                  ))}
                </div>
             )}
          </section>

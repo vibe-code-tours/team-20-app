@@ -18,6 +18,13 @@ import RegisterPage from './pages/RegisterPage';
 import AdminLayout from './pages/admin/AdminLayout';
 import InvitationsPage from './pages/admin/InvitationsPage';
 import UsersPage from './pages/admin/UsersPage';
+import DashboardLayout from './pages/dashboard/DashboardLayout';
+import DashboardPage from './pages/dashboard/DashboardPage';
+import DashboardEventsPage from './pages/dashboard/EventsPage';
+import DashboardOrdersPage from './pages/dashboard/OrdersPage';
+import DashboardMenuPage from './pages/dashboard/MenuPage';
+import DashboardAnalyticsPage from './pages/dashboard/AnalyticsPage';
+import DashboardExportPage from './pages/dashboard/ExportPage';
 
 export default function App() {
    return (
@@ -48,6 +55,10 @@ export default function App() {
                         element={<OrderConfirmationPage />}
                      />
                      <Route
+                        path="/order-tracking"
+                        element={<OrderTrackingPage />}
+                     />
+                     <Route
                         path="/order-tracking/:orderNumber"
                         element={<OrderTrackingPage />}
                      />
@@ -66,6 +77,30 @@ export default function App() {
                            element={<InvitationsPage />}
                         />
                         <Route path="users" element={<UsersPage />} />
+                     </Route>
+                  </Route>
+
+                  {/* Protected dashboard routes */}
+                  <Route element={<ProtectedRoute />}>
+                     <Route path="/dashboard" element={<DashboardLayout />}>
+                        <Route index element={<DashboardPage />} />
+                        <Route
+                           path="events"
+                           element={<DashboardEventsPage />}
+                        />
+                        <Route
+                           path="orders"
+                           element={<DashboardOrdersPage />}
+                        />
+                        <Route path="menu" element={<DashboardMenuPage />} />
+                        <Route
+                           path="analytics"
+                           element={<DashboardAnalyticsPage />}
+                        />
+                        <Route
+                           path="export"
+                           element={<DashboardExportPage />}
+                        />
                      </Route>
                   </Route>
                </Routes>
