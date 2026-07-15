@@ -61,20 +61,22 @@ const statusConfig: Record<
 };
 
 export default function OrderTrackingPage() {
-   const { orderNumber } = useParams<{ orderNumber: string }>();
+   const { orderNumber: urlOrderNumber } = useParams<{ orderNumber: string }>();
+   const [inputValue, setInputValue] = useState(urlOrderNumber || '');
    const [order, setOrder] = useState<Order | null>(null);
    const [loading, setLoading] = useState(false);
    const [error, setError] = useState('');
 
-   const handleSearch = async () => {
-      if (!orderNumber) return;
+   const handleSearch = async (orderNum?: string) => {
+      const num = orderNum || inputValue;
+      if (!num) return;
 
       setLoading(true);
       setError('');
       setOrder(null);
 
       try {
-         const { data } = await axios.get(`/api/orders/${orderNumber}`);
+         const { data } = await axios.get(`/api/orders/${num}`);
          setOrder(data);
       } catch (err) {
          if (axios.isAxiosError(err) && err.response?.status === 404) {
@@ -91,10 +93,11 @@ export default function OrderTrackingPage() {
 
    // Auto-fetch if orderNumber is in URL
    useEffect(() => {
-      if (orderNumber) {
-         handleSearch();
+      if (urlOrderNumber) {
+         setInputValue(urlOrderNumber);
+         handleSearch(urlOrderNumber);
       }
-   }, [orderNumber]);
+   }, [urlOrderNumber]);
 
    const status = order
       ? statusConfig[order.status] || statusConfig.PENDING
@@ -110,22 +113,28 @@ export default function OrderTrackingPage() {
          </p>
 
          {/* Search form */}
-         <div className="flex gap-3 mb-8">
+         <form
+            onSubmit={(e) => {
+               e.preventDefault();
+               handleSearch();
+            }}
+            className="flex gap-3 mb-8"
+         >
             <input
                type="text"
-               value={orderNumber || ''}
-               readOnly
-               className="flex-1 px-4 py-2 border border-border rounded-md bg-background text-foreground"
+               value={inputValue}
+               onChange={(e) => setInputValue(e.target.value)}
+               className="flex-1 px-4 py-2 border border-border rounded-md bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
                placeholder="e.g. ORD-20260712-0002"
             />
             <button
-               onClick={handleSearch}
-               disabled={loading || !orderNumber}
+               type="submit"
+               disabled={loading || !inputValue}
                className="bg-primary text-primary-foreground px-6 py-2 rounded-md font-medium hover:opacity-90 disabled:opacity-50"
             >
                {loading ? 'Checking...' : 'Track'}
             </button>
-         </div>
+         </form>
 
          {error && (
             <div className="p-4 bg-destructive/10 text-destructive text-sm rounded-md mb-6">

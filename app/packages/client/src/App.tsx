@@ -55,6 +55,10 @@ export default function App() {
                         element={<OrderConfirmationPage />}
                      />
                      <Route
+                        path="/order-tracking"
+                        element={<OrderTrackingPage />}
+                     />
+                     <Route
                         path="/order-tracking/:orderNumber"
                         element={<OrderTrackingPage />}
                      />
