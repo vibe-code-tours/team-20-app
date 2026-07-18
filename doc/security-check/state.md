@@ -1,6 +1,27 @@
 # Feature State Log
 
-## [2026-07-17 10:00 AM] feat: full codebase security audit
+## [2026-07-18 04:50 AM] fix: add missing security headers to netlify.toml
+
+### Summary of Changes
+
+- Added `[[headers]]` section to `netlify.toml` with standard security headers
+- Headers added: X-Frame-Options, X-Content-Type-Options, Referrer-Policy, Permissions-Policy, X-XSS-Protection, Content-Security-Policy
+- Applied to all routes (`/*`)
+
+### Impact & Dependencies
+
+- File changed: `netlify.toml`
+- No code changes — deployment configuration only
+- CSP includes `unsafe-inline` and `unsafe-eval` for script-src due to Vite dev mode and React; tighten in production if needed
+
+### Testing Status
+
+- [x] AI Self-Review Done
+- [ ] Human Manual Test Pending
+
+---
+
+## [2026-07-18 04:30 PM] feat: full codebase security audit
 
 ### Summary of Changes
 

@@ -10,13 +10,13 @@
 
 ## Summary
 
-| # | Severity | Category | File | Confidence |
-|---|----------|----------|------|------------|
-| 1 | HIGH | auth_bypass | routes.ts:169,191,194 | 10/10 |
-| 2 | HIGH | auth_bypass | routes.ts:207,230,239,242 | 9/10 |
-| 3 | HIGH | auth_bypass | routes.ts:277-301 | 9/10 |
-| 4 | MEDIUM | idor | routes.ts:100-105,115-119,149-153 | 9/10 |
-| 5 | MEDIUM | csv_injection | export.service.ts:21-35,55-63 | 9/10 |
+| #   | Severity | Category      | File                              | Confidence |
+| --- | -------- | ------------- | --------------------------------- | ---------- |
+| 1   | HIGH     | auth_bypass   | routes.ts:169,191,194             | 10/10      |
+| 2   | HIGH     | auth_bypass   | routes.ts:207,230,239,242         | 9/10       |
+| 3   | HIGH     | auth_bypass   | routes.ts:277-301                 | 9/10       |
+| 4   | MEDIUM   | idor          | routes.ts:100-105,115-119,149-153 | 9/10       |
+| 5   | MEDIUM   | csv_injection | export.service.ts:21-35,55-63     | 9/10       |
 
 **Root cause:** The application has authentication and role-based authorization middleware (`authenticate`, `requireRole`, `requireEventOwnership`) but inconsistently applies it. Admin and dashboard routes are protected; standalone CRUD routes for events, menu items, and orders are not.
 
@@ -24,10 +24,10 @@
 
 ## Vuln 1: Broken Access Control — Event Management Endpoints Unauthenticated
 
-* **File:** `app/packages/server/routes.ts:169, 191, 194`
-* **Severity:** HIGH
-* **Category:** `auth_bypass`
-* **Confidence:** 10/10
+- **File:** `app/packages/server/routes.ts:169, 191, 194`
+- **Severity:** HIGH
+- **Category:** `auth_bypass`
+- **Confidence:** 10/10
 
 **Description:** The `POST /api/events`, `PATCH /api/events/:id`, and `DELETE /api/events/:id` endpoints have no `authenticate`, `requireRole`, or `requireEventOwnership` middleware. Any anonymous user can create, modify, or delete any event, including cascading to associated menu items and orders.
 
@@ -39,10 +39,10 @@
 
 ## Vuln 2: Broken Access Control — Menu Item Management Endpoints Unauthenticated
 
-* **File:** `app/packages/server/routes.ts:207, 230, 239, 242`
-* **Severity:** HIGH
-* **Category:** `auth_bypass`
-* **Confidence:** 9/10
+- **File:** `app/packages/server/routes.ts:207, 230, 239, 242`
+- **Severity:** HIGH
+- **Category:** `auth_bypass`
+- **Confidence:** 9/10
 
 **Description:** The `POST /api/menu-items`, `POST /api/menu-items/batch`, `PATCH /api/menu-items/:id`, and `DELETE /api/menu-items/:id` endpoints have no authentication middleware. Any anonymous user can create, modify, or delete menu items for any event, including manipulating prices and stock quantities.
 
@@ -54,10 +54,10 @@
 
 ## Vuln 3: Broken Access Control — Order State-Changing Endpoints Unauthenticated
 
-* **File:** `app/packages/server/routes.ts:277-301`
-* **Severity:** HIGH
-* **Category:** `auth_bypass`
-* **Confidence:** 9/10
+- **File:** `app/packages/server/routes.ts:277-301`
+- **Severity:** HIGH
+- **Category:** `auth_bypass`
+- **Confidence:** 9/10
 
 **Description:** The `PATCH /api/orders/:orderNumber`, `PATCH /api/orders/:orderNumber/cancel`, `PATCH /api/orders/:orderNumber/confirm`, and `PATCH /api/orders/:orderNumber/complete` endpoints have no authentication middleware. Any anonymous user who knows or guesses an order number can modify, cancel, confirm, or complete any order.
 
@@ -69,10 +69,10 @@
 
 ## Vuln 4: IDOR — Dashboard/Export Endpoints Lack Event Ownership Verification
 
-* **File:** `app/packages/server/routes.ts:100-105, 115-119, 149-153`
-* **Severity:** MEDIUM
-* **Category:** `idor`
-* **Confidence:** 9/10
+- **File:** `app/packages/server/routes.ts:100-105, 115-119, 149-153`
+- **Severity:** MEDIUM
+- **Category:** `idor`
+- **Confidence:** 9/10
 
 **Description:** Three endpoints accept an `orderId` parameter (sequential auto-increment integer) and have `authenticate` + `requireRole('ADMIN', 'ORGANIZER')` but lack event ownership verification. An ORGANIZER for Event A can access, modify, and export data for orders belonging to Event B.
 
@@ -84,14 +84,15 @@
 
 ## Vuln 5: CSV Formula Injection in Order/Menu Exports
 
-* **File:** `app/packages/server/services/export.service.ts:21-35, 55-63`
-* **Severity:** MEDIUM
-* **Category:** `csv_injection`
-* **Confidence:** 9/10
+- **File:** `app/packages/server/services/export.service.ts:21-35, 55-63`
+- **Severity:** MEDIUM
+- **Category:** `csv_injection`
+- **Confidence:** 9/10
 
 **Description:** The export endpoints generate CSV content via manual string concatenation with no sanitization. Fields starting with `=`, `+`, `-`, or `@` are interpreted as formulas by spreadsheet applications (Excel, LibreOffice Calc, Google Sheets). Since order creation is unauthenticated (Vuln 3), an attacker can inject malicious CSV formulas via customer name.
 
 **Exploit Scenario:**
+
 1. Attacker creates an order via `POST /api/orders` with `customer.name` set to `=cmd|'/C calc'!A0` or `=HYPERLINK("https://evil.com/phish","Click here")`.
 2. Admin downloads CSV export from `/api/export/:eventId/orders`.
 3. Admin opens the CSV in Excel, which executes the embedded formula — arbitrary command execution or phishing on the admin's machine.
@@ -105,6 +106,17 @@
 ## Excluded Findings
 
 **Prompt Injection in LLM Chat Endpoints:** Excluded as false positive (confidence 9/10). The system prompt contains no sensitive information (public menu data and chatbot persona only). The LLM has zero write access to backend systems. Order extraction results are validated against the database before use. The 100-character input limit further limits exploitation. No meaningful attack surface exists.
+
+**Missing Security Headers in netlify.toml (External Issue #45):** Excluded as hardening recommendation, not a vulnerability. The `netlify.toml` has no `[[headers]]` section, so the deployed site lacks X-Frame-Options, X-Content-Type-Options, CSP, Referrer-Policy, and Permissions-Policy headers.
+
+- **Why it's not a vulnerability:** These are defense-in-depth hardening measures. Their absence does not create a concrete, directly exploitable attack path. No attacker can exploit the _lack_ of these headers to achieve RCE, data breach, or auth bypass. Per audit criteria: _"A lack of hardening measures is not a vulnerability."_
+- **Why the issue creator is right to raise it:** These headers ARE OWASP-recommended best practices and should be added. Specifically:
+    - `X-Frame-Options: DENY` — prevents clickjacking (site embedded in malicious iframes)
+    - `X-Content-Type-Options: nosniff` — prevents MIME-type sniffing attacks
+    - `Content-Security-Policy` — restricts resource loading, mitigating XSS (though React is already XSS-secure without `dangerouslySetInnerHTML`)
+    - `Referrer-Policy` — controls referrer information leakage
+    - `Permissions-Policy` — restricts access to browser features (camera, microphone, geolocation)
+- **Recommendation:** Add the `[[headers]]` section to `netlify.toml` as a hardening improvement. This is a valid best-practice fix, not a security vulnerability.
 
 ---
 
