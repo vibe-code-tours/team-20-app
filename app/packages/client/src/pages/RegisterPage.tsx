@@ -144,6 +144,9 @@ export default function RegisterPage() {
                      className="w-full px-3 py-2 border border-border rounded-md bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
                      placeholder="e.g. ABC123DEF456"
                   />
+                  <p className="mt-1 text-xs text-muted-foreground">
+                     Contact an organizer to get your invitation code
+                  </p>
                </div>
 
                <div className="mb-4">
