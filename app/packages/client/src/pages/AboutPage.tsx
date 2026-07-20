@@ -1,4 +1,5 @@
 import { motion } from 'framer-motion';
+import { Link } from 'react-router-dom';
 import {
    Heart,
    Users,
@@ -94,18 +95,18 @@ export default function AboutPage() {
                   custom={2}
                   className="flex items-center justify-center gap-4"
                >
-                  <a
-                     href="/events"
+                  <Link
+                     to="/events"
                      className="glass-subtle text-white px-8 py-3.5 rounded-full text-sm font-semibold hover:scale-105 transition-all duration-300 shadow-lg"
                   >
                      Browse Events
-                  </a>
-                  <a
-                     href="/contact"
+                  </Link>
+                  <Link
+                     to="/contact"
                      className="glass-subtle text-white px-8 py-3.5 rounded-full text-sm font-semibold hover:scale-105 transition-all duration-300"
                   >
                      Get in Touch
-                  </a>
+                  </Link>
                </motion.div>
             </div>
          </section>
