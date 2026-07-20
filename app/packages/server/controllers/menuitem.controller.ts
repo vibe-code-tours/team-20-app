@@ -76,7 +76,21 @@ export const menuItemController = {
          });
 
          res.json({ message: 'Menu Item created successfully' });
-      } catch (error) {
+      } catch (error: any) {
+         // Handle unique constraint violations
+         if (error?.code === 'P2002') {
+            const target = error?.meta?.target;
+            if (target?.includes('name')) {
+               return res.status(409).json({
+                  error: `Menu item name "${parseResult.data.name}" already exists in this event`,
+               });
+            }
+            if (target?.includes('itemCode')) {
+               return res.status(409).json({
+                  error: `Menu item code "${parseResult.data.itemCode}" already exists in this event`,
+               });
+            }
+         }
          return res.status(500).json({ error: 'Failed to create menu item' });
       }
    },
@@ -104,7 +118,21 @@ export const menuItemController = {
          await menuItemService.createMenuItemsBatch(menuItemsToCreate);
 
          res.json({ message: 'Menu Items created successfully' });
-      } catch (error) {
+      } catch (error: any) {
+         // Handle unique constraint violations
+         if (error?.code === 'P2002') {
+            const target = error?.meta?.target;
+            if (target?.includes('name')) {
+               return res.status(409).json({
+                  error: 'One or more menu item names already exist in this event',
+               });
+            }
+            if (target?.includes('itemCode')) {
+               return res.status(409).json({
+                  error: 'One or more menu item codes already exist in this event',
+               });
+            }
+         }
          return res.status(500).json({ error: 'Failed to create menu items' });
       }
    },

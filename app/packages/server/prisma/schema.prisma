@@ -114,6 +114,7 @@ model MenuItem {
   createdAt DateTime @default(now())
 
   @@unique([eventId, itemCode])
+  @@unique([eventId, name])
   @@map("menu_items")
 }
 
