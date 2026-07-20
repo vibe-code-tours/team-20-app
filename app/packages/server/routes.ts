@@ -152,9 +152,9 @@ router.get(
    exportController.generatePackingSlip
 );
 
-// ─── Chat (public) ───────────────────────────────────────────────────────────
-router.post('/api/chat', chatController.sendMessage);
-router.post('/api/chat/extract-order', chatController.extractOrder);
+// ─── Chat (authenticated) ────────────────────────────────────────────────────
+router.post('/api/chat', authenticate, chatController.sendMessage);
+router.post('/api/chat/extract-order', authenticate, chatController.extractOrder);
 
 // ─── Events ──────────────────────────────────────────────────────────────────
 // POST /api/events - create event.
