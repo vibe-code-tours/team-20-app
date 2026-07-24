@@ -538,6 +538,15 @@ const ChatBot = () => {
          return;
       }
 
+      // Validate phone number format
+      const digits = phoneRaw.replace(/[\s\-().]/g, '');
+      if (digits.length < 7 || digits.length > 15 || !/^\+?\d+$/.test(digits)) {
+         pushBot(
+            'That does not look like a valid phone number. Please enter a valid phone number (e.g. 021 123 456).'
+         );
+         return;
+      }
+
       setDraftOrder((prev) => ({
          ...prev,
          customer: { name: nameRaw, phone: phoneRaw },

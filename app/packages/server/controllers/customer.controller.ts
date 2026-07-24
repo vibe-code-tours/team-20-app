@@ -1,10 +1,16 @@
 import type { Request, Response } from 'express';
 import z from 'zod';
 import { customerService } from '../services/customer.service';
+import { isValidPhone } from '../utils/validations';
 
 const customerCreateRequestSchema = z.object({
    name: z.string().min(1, 'Name is required'),
-   phone: z.string().min(1, 'Phone number is required'),
+   phone: z
+      .string()
+      .min(1, 'Phone number is required')
+      .refine((val) => isValidPhone(val), {
+         message: 'Please enter a valid phone number (e.g. 021 123 456)',
+      }),
 });
 
 export const customerController = {

@@ -39,11 +39,16 @@ api.interceptors.response.use(
                // Refresh failed — clear tokens and redirect to login
                localStorage.removeItem('accessToken');
                localStorage.removeItem('refreshToken');
-               window.location.href = '/login';
+               // Only redirect if not already on login page
+               if (!window.location.pathname.includes('/login')) {
+                  window.location.href = '/login';
+               }
             }
          } else {
-            // No refresh token — redirect to login
-            window.location.href = '/login';
+            // No refresh token — only redirect if not already on login page
+            if (!window.location.pathname.includes('/login')) {
+               window.location.href = '/login';
+            }
          }
       }
 

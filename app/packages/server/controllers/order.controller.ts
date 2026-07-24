@@ -1,13 +1,20 @@
 import type { Request, Response } from 'express';
 import z from 'zod';
 import { orderService } from '../services/order.service';
+import { isValidPhone } from '../utils/validations';
 
 const createOrderRequestSchema = z.object({
    note: z.string().nullable().optional(),
    eventId: z.number().positive('eventId must be a positive number'),
    customer: z.object({
       name: z.string().trim().min(1, 'customer name is required'),
-      phone: z.string().trim().min(1, 'customer phone is required'),
+      phone: z
+         .string()
+         .trim()
+         .min(1, 'customer phone is required')
+         .refine((val) => isValidPhone(val), {
+            message: 'Please enter a valid phone number (e.g. 021 123 456)',
+         }),
    }),
    items: z
       .array(

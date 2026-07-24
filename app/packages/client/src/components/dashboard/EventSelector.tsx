@@ -71,7 +71,7 @@ export default function EventSelector() {
          <select
             value={selectedEventId || ''}
             onChange={handleChange}
-            className="w-full pl-10 pr-4 py-3 border-2 border-primary/50 rounded-lg bg-background text-foreground font-medium focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary appearance-none cursor-pointer shadow-sm"
+            className="w-full pl-10 pr-4 py-3 border-2 border-primary/50 rounded-lg bg-background text-foreground font-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:border-primary appearance-none cursor-pointer shadow-sm"
          >
             <option value="">Select an event...</option>
             {events.map((event) => (

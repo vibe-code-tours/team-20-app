@@ -52,6 +52,27 @@ export default function MenuOrderingPage() {
    const [note, setNote] = useState('');
    const [submitting, setSubmitting] = useState(false);
    const [submitError, setSubmitError] = useState('');
+   const [phoneError, setPhoneError] = useState('');
+
+   const isPhoneValid = (value: string) => {
+      const digits = value.replace(/[\s\-().]/g, '');
+      return (
+         digits.length >= 7 && digits.length <= 15 && /^\+?\d+$/.test(digits)
+      );
+   };
+
+   const validatePhone = (value: string) => {
+      if (value.length === 0) {
+         setPhoneError('');
+         return false;
+      }
+      if (!isPhoneValid(value)) {
+         setPhoneError('Please enter a valid phone number (e.g. 021 123 456)');
+         return false;
+      }
+      setPhoneError('');
+      return true;
+   };
 
    useEffect(() => {
       if (!eventId) return;
@@ -117,6 +138,7 @@ export default function MenuOrderingPage() {
    const handleSubmit = async (e: React.FormEvent) => {
       e.preventDefault();
       if (!event || cart.length === 0 || !name.trim() || !phone.trim()) return;
+      if (!validatePhone(phone)) return;
 
       setSubmitting(true);
       setSubmitError('');
@@ -346,11 +368,19 @@ export default function MenuOrderingPage() {
                               <input
                                  type="tel"
                                  value={phone}
-                                 onChange={(e) => setPhone(e.target.value)}
+                                 onChange={(e) => {
+                                    setPhone(e.target.value);
+                                    validatePhone(e.target.value);
+                                 }}
                                  required
                                  placeholder="e.g. 021 123 456"
                                  className="w-full mt-1 px-3 py-2 border border-border rounded-md text-sm bg-background"
                               />
+                              {phoneError && (
+                                 <p className="text-xs text-destructive mt-1">
+                                    {phoneError}
+                                 </p>
+                              )}
                            </div>
                            <div>
                               <label className="text-sm font-medium">
@@ -380,7 +410,8 @@ export default function MenuOrderingPage() {
                                  submitting ||
                                  cart.length === 0 ||
                                  !name.trim() ||
-                                 !phone.trim()
+                                 !phone.trim() ||
+                                 !isPhoneValid(phone)
                               }
                               className="w-full bg-primary text-primary-foreground py-2.5 rounded-md text-sm font-medium hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed"
                            >
